@@ -1,0 +1,7 @@
+\noindent\rule{\textwidth}{1pt}
+\indent \textbf{Windowed uniqueness selection method}
+\noindent\rule{\textwidth}{1pt}
+\smallskip
+\parbox{\textwidth}{The windowed uniqueness method uses the uniqueness of the best match in comparison to other candidates, to determine the strength of the match. An exclusion window is used to exclude values around the best match, assisting in getting a more robust measure of uniqueness. Uniqueness is determined by the factor by which a best match is better than the next best match candidate. Parementers controlling the uniqueness method are:}
+\parbox{\textwidth}{--- $r_{window}$: the width of the exclusion window when looking for the next best match candidate \\ --- $\mu$: the factor by which the best match has to be better than the next best match ($\mu=\frac{min_1}{min_2}$, where $min_1$ is the score of the best match, and $min_2$ is the score of the next best match outside the exclusion window)}
+\smallskip

@@ -1,0 +1,8 @@
+<launch>
+  <node name="so_dso_gist" pkg="so_dso_loop_closure" type="test_gist" output="screen">
+    <param name="incoming_id_file" value="$(find so_dso_loop_closure)/loop_closure/results/KITTI/06/incoming_id_file.txt" />
+    <param name="bag" value="/home/jiawei/Workspace/data/bags/KITTI/seq06.bag" />
+    <param name="img_topic" value="/left/image_raw" />
+    <param name="gist_file" value="$(find so_dso_loop_closure)/loop_closure/results/KITTI/06/historyGIST.txt" />
+  </node>
+</launch>

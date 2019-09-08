@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>so_dso_loop_closure</name>
+  <version>1.0.0</version>
+  <description>
+
+    Loop closure detection using 3D points from SO-DSO.
+
+  </description>
+
+  <author>Jiawei Mo</author>
+  <license>MIT</license>
+  <maintainer email="moxxx066@umn.edu">
+    Jiawei Mo
+  </maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>dso</depend>
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>pcl_ros</depend>
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>message_filters</depend>
+</package>
