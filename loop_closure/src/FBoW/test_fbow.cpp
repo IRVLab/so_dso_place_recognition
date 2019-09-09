@@ -145,7 +145,7 @@ void readDescFromBagByID(std::string incoming_id_file, std::string bag_file,
     descriptors_vec.push_back(descriptors);
   }
   std::cout << std::endl
-            << "FBoW average time: "
+            << "FBoW extraction time: "
             << 1000.0 * total_time / incoming_id_vec.size() << "ms"
             << std::endl;
   bag.close();
@@ -184,14 +184,14 @@ int main(int argc, char **argv) {
   std::vector<std::vector<double>> scores(desc_vec1.size(), _tmp);
   std::vector<fbow::fBow> vv1, vv2;
   int avgScore = 0;
-  auto t_start = std::chrono::high_resolution_clock::now();
+  std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
   for (size_t i = 0; i < desc_vec1.size(); ++i) {
     vv1.push_back(voc.transform(desc_vec1[i]));
   }
   for (size_t j = 0; j < desc_vec2.size(); ++j) {
     vv2.push_back(voc.transform(desc_vec2[j]));
   }
-#pragma omp parallel for simd
+
   for (size_t i = 0; i < desc_vec1.size(); ++i) {
     std::vector<double> score;
     for (size_t j = 0; j < desc_vec2.size(); ++j) {
@@ -199,6 +199,14 @@ int main(int argc, char **argv) {
     }
     printProgress(double(i) / desc_vec1.size());
   }
+
+  std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+  float ttOpt =
+      std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
+          .count();
+  std::cout << std::endl
+            << "FBoW matching time: " << 1000.0 * ttOpt / desc_vec1.size()
+            << "ms" << std::endl;
 
   std::ofstream outfile(output_file);
   for (auto ss : scores) {

@@ -2,9 +2,9 @@ clear
 close all
 
 % type = 'M2DP';
-type = 'SC';
+% type = 'SC';
 % type = 'DELIGHT';
-% type = 'GIST';
+type = 'GIST';
 % type = 'FBoW';
 
 dates = ["2014-07-14-14-49-50";"2014-11-28-12-07-13";"2014-12-12-10-45-15";"2015-02-10-11-58-05";
@@ -43,6 +43,7 @@ if (~strcmp(type, 'FBoW'))
     hist2 = load(strcat(strcat(strcat(strcat('../../results/RobotCar/',run2),'/history'), type), '.txt'));
 end
 
+tic
 % get difference matrix
 switch type
     case 'M2DP'
@@ -58,6 +59,7 @@ switch type
         diff_m = diff_m(start_idx+1:size(diff_m,1)-end_idx, start_idx+1:size(diff_m,2)-end_idx);
         diff_m = 1-diff_m;
 end
+toc
 
 [AUC, top_recall] = getAUCandPlot(diff_m, gt1, gt2, loop_diff, run_count);
 end
