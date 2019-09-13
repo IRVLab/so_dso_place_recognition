@@ -3,7 +3,7 @@ function [AUC, top_recall] = getAUCandPlot(diff_m, gt1, gt2, loop_diff, run_coun
 [diff_v, diff_idx] = min(diff_m');
 [~, diff_rank] = sort(diff_v);
 
-% get ground truth loop closure
+% get ground truth 
 lp_gt = [];
 for i=1:size(gt1,1)
     min_diff = inf;

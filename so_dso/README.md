@@ -28,6 +28,6 @@ Time logs:
 # Parameters
 The only extra parameter of this work over [DSO](https://github.com/JakobEngel/dso) is the scale_accept_th, which is the threshold to accept a result from scaler optimizer. Usually, it is around 10-15.# place_recognition
 
-# Loop closure files in .ros folder
+# Files for place recognition in .ros folder
 - poses_history_file.txt: [incoming_id, pose[t11, t12, ..., t34]]
 - pts_history_file.txt: [incoming_id, location in local frame[x,y,z], color intensity]

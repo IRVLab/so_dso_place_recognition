@@ -49,7 +49,7 @@ end
 [dist_v, dist_idx] = min(dist_m');
 [~, dist_rank] = sort(dist_v);
 
-% get ground truth loop closure
+% get ground truth
 lp_gt = [];
 for i=1:size(gt,1)
     min_dist = inf;
@@ -132,7 +132,7 @@ if strcmp(type, 'M2DP') || strcmp(type, 'SC')
     lp_t = [rank_t(1:top_count)', dist_t_idx(rank_t(1:top_count))'];
     lp_i = [rank_i(1:top_count)', dist_i_idx(rank_i(1:top_count))'];
     lp_ti = [rank_ti(1:top_count)', dist_ti_idx(rank_ti(1:top_count))'];
-    figure('Name', 'Loop Closure')
+    figure('Name', 'Place Recognition')
     subplot(1,2,1)
     plot(lp_t(:,1),lp_t(:,2), 'r.');
     hold on

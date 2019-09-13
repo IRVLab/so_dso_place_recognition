@@ -1,5 +1,6 @@
-# Loop closure detection using 3D points from SO-DSO.
+# Place recognition using 3D points from SO-DSO.
 
 # Usage
-- Run SO-DSO to generate Loop closure files, see [instruction](https://github.umn.edu/moxxx066/place_recognition/blob/master/so_dso/README.md)
-- Run Loop closure detection, see examples in launch folder
+- Run SO-DSO to generate 3D points and poses, see [instruction](https://github.com/jiawei-mo/3d_place_recognition/blob/master/so_dso/README.md)
+- Generate descriptors, see examples in launch folder
+- Run place recognition, see ./matlab/pair/robotcar.m

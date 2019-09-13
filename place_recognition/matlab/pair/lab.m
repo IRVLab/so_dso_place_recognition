@@ -27,6 +27,6 @@ end
 top_count = length(dist_rank);
 % top_count = 20;
 lp_ti = [dist_rank(1:top_count)', dist_idx(dist_rank(1:top_count))'];
-figure('Name', 'Loop Closure')
+figure('Name', 'Place Recognition')
 plot(lp_ti(:,1),lp_ti(:,2), 'b*');
 title('Detected');
