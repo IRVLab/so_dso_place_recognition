@@ -1,9 +1,0 @@
-<launch>
-  <arg name="date" value="2015-02-10-11-58-05"/>
-  <node name="so_dso_bag2img" pkg="so_dso_loop_closure" type="bag2img" output="screen">
-    <param name="incoming_id_file" value="$(find so_dso_loop_closure)/loop_closure/results/RobotCar/$(arg date)/incoming_id_file.txt" />
-    <param name="bag" value="/home/jiawei/Workspace/data/bags/RobotCar/$(arg date).bag" />
-    <param name="img_topic" value="camera/left/image_raw" />
-    <param name="output_folder" value="/home/jiawei/Workspace/data/bags/RobotCar/$(arg date)/" />
-  </node>
-</launch>

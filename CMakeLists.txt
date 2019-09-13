@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.4.6)
-project(so_dso_loop_closure)
+project(so_dso_place_recognition)
 
 set(BUILD_TYPE Release)
 
@@ -44,4 +44,4 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 add_subdirectory(so_dso)
-add_subdirectory(loop_closure)
+add_subdirectory(place_recognition)

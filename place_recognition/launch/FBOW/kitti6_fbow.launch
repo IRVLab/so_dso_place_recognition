@@ -1,0 +1,11 @@
+<launch>
+  <node name="so_dso_fbow" pkg="so_dso_place_recognition" type="test_fbow" output="screen">
+    <param name="voc_file" value="$(find so_dso_place_recognition)/place_recognition/FBoW/orb_mur.fbow" />
+    <param name="incoming_id_file1" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/06/incoming_id_file.txt" />
+    <param name="incoming_id_file2" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/06/incoming_id_file.txt" />
+    <param name="bag1" value="/home/jiawei/Workspace/data/bags/KITTI/seq06.bag" />
+    <param name="bag2" value="/home/jiawei/Workspace/data/bags/KITTI/seq06.bag" />
+    <param name="img_topic" value="/left/image_raw" />
+    <param name="output_file" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/06/FBoW/dist_mat.txt" />
+  </node>
+</launch>
