@@ -2,10 +2,10 @@ clear
 close all
 
 % type = 'M2DP';
-type = 'SC';
+% type = 'SC';
 % type = 'DELIGHT';
 % type = 'GIST';
-% type = 'FBoW';
+type = 'FBoW';
 
 start_idx = 20;
 end_idx = 20;
@@ -33,7 +33,7 @@ switch type
     case 'GIST'
         dist_m = processGIST(hist, start_idx, end_idx, mask_width);
     case 'FBoW'
-        dist_m = load('../../results/KITTI/06/FBoW/dist_mat.txt');
+        dist_m = load('../../results/KITTI/06/FBoW/diff_mat.txt');
         dist_m = dist_m(start_idx+1:size(dist_m,1)-end_idx, start_idx+1:size(dist_m,2)-end_idx);
         dist_m = 1-dist_m;
         for i=1:size(dist_m,1)

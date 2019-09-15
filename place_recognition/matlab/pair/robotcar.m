@@ -1,10 +1,10 @@
 clear
 close all
 
-% type = 'M2DP';
+type = 'M2DP';
 % type = 'SC';
 % type = 'DELIGHT';
-type = 'GIST';
+% type = 'GIST';
 % type = 'FBoW';
 
 dates = ["2014-07-14-14-49-50";"2014-11-28-12-07-13";"2014-12-12-10-45-15";"2015-02-10-11-58-05";
@@ -14,8 +14,8 @@ run_seq = [5,6; 5,7; 5,8; 5,4; 7,1; 7,8; 7,4; 8,2; 8,4; 4,3];
 
 TRs = zeros(1, size(run_seq,1));
 AUCs = zeros(1, size(run_seq,1));
-% for seqi=1:size(run_seq,1)
-for seqi=1
+for seqi=1:size(run_seq,1)
+% for seqi=1
     run1 = dates(run_seq(seqi,1));
     run2 = dates(run_seq(seqi,2));
     [AUCs(seqi), TRs(seqi)] = run_test(run1, run2, seqi, type);

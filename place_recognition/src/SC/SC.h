@@ -13,12 +13,8 @@ public:
 
   void
   getSignature(const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr,
-               Eigen::VectorXd &count_output, Eigen::VectorXd &color_output,
-               double maxRho = -1.0);
-
-  void PCARotationInvariant(
-      const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_in,
-      std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_out);
+               Eigen::VectorXd &structure_output,
+               Eigen::VectorXd &intensity_output, double max_rho = -1.0);
 
 private:
   int numS;

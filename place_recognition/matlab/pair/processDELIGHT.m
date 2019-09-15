@@ -17,6 +17,7 @@ function dist = processDELIGHT(hist1, hist2, start_idx, end_idx)
         temp = temp';
         hist1_vec(i,:) = temp(:);
     end
+    
     % permute hist2 and linearize
     hist2_vec_mut = zeros(n, size(hist2,2)*16, 4);
     for k=1:4

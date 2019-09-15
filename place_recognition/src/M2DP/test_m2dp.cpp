@@ -7,7 +7,8 @@
 
 #include "M2DP.h"
 #include "place_recognition/src/utils/print_progress.h"
-#include "place_recognition/src/utils/process_pts.h"
+#include "place_recognition/src/utils/pts_align.h"
+#include "place_recognition/src/utils/pts_preprocess.h"
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "test_m2dp");
@@ -25,14 +26,14 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  double loopRange, voxelAngle;
-  nhPriv.param("loopRange", loopRange, 45.0);
+  double lidarRange, voxelAngle;
+  nhPriv.param("lidarRange", lidarRange, 45.0);
   nhPriv.param("voxelAngle", voxelAngle, 1.0);
 
   // process points
   std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_sphere_vec;
-  process_pts(poses_history_file, pts_history_file, incoming_id_file, loopRange,
-              voxelAngle, pts_sphere_vec);
+  pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
+                 lidarRange, voxelAngle, pts_sphere_vec);
 
   M2DP *m2dp = new M2DP();
   Eigen::MatrixXd historyM2DP =
@@ -40,36 +41,33 @@ int main(int argc, char **argv) {
 
   float total_time = 0.0;
   for (int pts_i = 0; pts_i < pts_sphere_vec.size(); pts_i++) {
-    std::vector<std::vector<std::pair<Eigen::Vector3d, float>>>
-        cur_pts_sphere_vec;
-    m2dp->PCARotationInvariant(pts_sphere_vec[pts_i], cur_pts_sphere_vec);
-
-    PointCloud::Ptr cloud(new PointCloud);
-    for (auto &p : cur_pts_sphere_vec[0]) {
-      pcl::PointXYZI p_xyzi(p.second);
-      p_xyzi.x = p.first(0);
-      p_xyzi.y = p.first(1);
-      p_xyzi.z = p.first(2);
-      cloud->points.push_back(p_xyzi);
-    }
-    cloud->header.frame_id = "map";
-    cloud->height = 1;
-    cloud->width = cur_pts_sphere_vec[0].size();
-    cloud->header.stamp = pts_i;
-    pcl_conversions::toPCL(ros::Time::now(), cloud->header.stamp);
-    pub.publish(cloud);
+    std::vector<std::pair<Eigen::Vector3d, float>> cur_pts_sphere;
+    align_points_PCA(pts_sphere_vec[pts_i], cur_pts_sphere);
 
     std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-    for (int config_i = 0; config_i < 4; config_i++) {
-      Eigen::VectorXd signature_ct, signature_ci;
-      m2dp->getSignature(cur_pts_sphere_vec[config_i], signature_ct,
-                         signature_ci, loopRange);
+    int history_subrow = 0;
+    for (int direction_x = -1; direction_x < 2; direction_x += 2) {
+      for (int direction_y = -1; direction_y < 2; direction_y += 2) {
+        // point directions
+        std::vector<std::pair<Eigen::Vector3d, float>> cur_pts_sphere_direction;
+        for (auto &pc : cur_pts_sphere) {
+          Eigen::Vector3d pts;
+          pts << direction_x * pc.first[0], direction_y * pc.first[1],
+              (direction_x * direction_y) * pc.first[2];
+          cur_pts_sphere_direction.push_back({pts, pc.second});
+        }
 
-      // record historyM2DP
-      Eigen::VectorXd signature(historyM2DP.cols());
-      signature << signature_ct, signature_ci;
-      historyM2DP.row(4 * pts_i + config_i) = signature.transpose();
+        Eigen::VectorXd signature_ct, signature_ci;
+        m2dp->getSignature(cur_pts_sphere_direction, signature_ct, signature_ci,
+                           lidarRange);
+
+        // record historyM2DP
+        Eigen::VectorXd signature(historyM2DP.cols());
+        signature << signature_ct, signature_ci;
+        historyM2DP.row(4 * pts_i + history_subrow++) = signature.transpose();
+      }
     }
+
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     float ttOpt =
         std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)

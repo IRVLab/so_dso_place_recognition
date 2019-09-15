@@ -27,18 +27,21 @@ function res = process(hist1, hist2)
     end
     res = inf*ones(m,n);
     for i=1:m
+        % permute forward and backward
         sig_i = zeros(120, 1200);
         for k=1:60
-            sig_i(2*k-1, :) = undiff_sc(hist1, i, k, false);
-            sig_i(2*k, :)   = undiff_sc(hist1, i, k, true);
+            sig_i(2*k-1, :) = permute_sc(hist1, i, k, false);
+            sig_i(2*k, :)   = permute_sc(hist1, i, k, true);
         end
+        
         diff_m = 1-sig_i * hist2';
         diff_v = min(diff_m);
         res(i,:) = diff_v;
     end
 end
 
-function sig = undiff_sc(hist, i, idx, reverse)
+% permute
+function sig = permute_sc(hist, i, idx, reverse)
     h_img = reshape(hist(i,:), [20,60]);
     if(~reverse)
         sig = h_img(:,[idx:1:60,1:1:(idx-1)]);

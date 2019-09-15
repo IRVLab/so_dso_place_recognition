@@ -8,7 +8,7 @@
 class DELIGHT {
 public:
   DELIGHT();
-  DELIGHT(float r1, float r2, int b);
+  DELIGHT(float _inner_radius, int _bins);
 
   unsigned int getSignatureSize();
 
@@ -16,12 +16,7 @@ public:
   getSignature(const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr,
                Eigen::MatrixXd &output);
 
-  void PCARotationInvariant(
-      const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_in,
-      std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_out);
-
 private:
-  float r1;
-  float r2;
-  int b;
+  float inner_radius;
+  int bins;
 };
