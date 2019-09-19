@@ -32,22 +32,22 @@ int main(int argc, char **argv) {
   nhPriv.param("voxelAngle", voxelAngle, 1.0);
 
   // process points
-  std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_sphere_vec;
+  std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_spherical_vec;
   pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
-                 lidarRange, voxelAngle, pts_sphere_vec);
+                 lidarRange, voxelAngle, pts_spherical_vec);
 
   DELIGHT *delight = new DELIGHT();
-  Eigen::MatrixXd historyDELIGHT =
-      Eigen::MatrixXd(16 * pts_sphere_vec.size(), delight->getSignatureSize());
+  Eigen::MatrixXd historyDELIGHT = Eigen::MatrixXd(
+      16 * pts_spherical_vec.size(), delight->getSignatureSize());
 
   float total_time = 0.0;
-  for (int pts_i = 0; pts_i < pts_sphere_vec.size(); pts_i++) {
-    std::vector<std::pair<Eigen::Vector3d, float>> cur_pts_sphere;
-    align_points_PCA(pts_sphere_vec[pts_i], cur_pts_sphere);
+  for (int pts_i = 0; pts_i < pts_spherical_vec.size(); pts_i++) {
+    std::vector<std::pair<Eigen::Vector3d, float>> pts_spherical_aligned;
+    align_points_PCA(pts_spherical_vec[pts_i], pts_spherical_aligned);
 
     Eigen::MatrixXd signature;
     std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-    delight->getSignature(cur_pts_sphere, signature);
+    delight->getSignature(pts_spherical_aligned, signature);
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     float ttOpt =
         std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
@@ -57,11 +57,12 @@ int main(int argc, char **argv) {
     // record historyDELIGHT
     historyDELIGHT.block(16 * pts_i, 0, 16, historyDELIGHT.cols()) = signature;
 
-    printProgress(float(pts_i) / pts_sphere_vec.size());
+    printProgress(float(pts_i) / pts_spherical_vec.size());
   }
   std::cout << std::endl
             << "DELIGHT average time: "
-            << 1000.0 * total_time / pts_sphere_vec.size() << "ms" << std::endl;
+            << 1000.0 * total_time / pts_spherical_vec.size() << "ms"
+            << std::endl;
 
   std::ofstream delight_file_stream;
   delight_file_stream.open(delight_file);

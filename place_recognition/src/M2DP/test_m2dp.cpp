@@ -31,35 +31,36 @@ int main(int argc, char **argv) {
   nhPriv.param("voxelAngle", voxelAngle, 1.0);
 
   // process points
-  std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_sphere_vec;
+  std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_spherical_vec;
   pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
-                 lidarRange, voxelAngle, pts_sphere_vec);
+                 lidarRange, voxelAngle, pts_spherical_vec);
 
   M2DP *m2dp = new M2DP();
-  Eigen::MatrixXd historyM2DP =
-      Eigen::MatrixXd(4 * pts_sphere_vec.size(), 2 * m2dp->getSignatureSize());
+  Eigen::MatrixXd historyM2DP = Eigen::MatrixXd(4 * pts_spherical_vec.size(),
+                                                2 * m2dp->getSignatureSize());
 
   float total_time = 0.0;
-  for (int pts_i = 0; pts_i < pts_sphere_vec.size(); pts_i++) {
-    std::vector<std::pair<Eigen::Vector3d, float>> cur_pts_sphere;
-    align_points_PCA(pts_sphere_vec[pts_i], cur_pts_sphere);
+  for (int pts_i = 0; pts_i < pts_spherical_vec.size(); pts_i++) {
+    std::vector<std::pair<Eigen::Vector3d, float>> pts_spherical_aligned;
+    align_points_PCA(pts_spherical_vec[pts_i], pts_spherical_aligned);
 
     std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
     int history_subrow = 0;
     for (int direction_x = -1; direction_x < 2; direction_x += 2) {
       for (int direction_y = -1; direction_y < 2; direction_y += 2) {
         // point directions
-        std::vector<std::pair<Eigen::Vector3d, float>> cur_pts_sphere_direction;
-        for (auto &pc : cur_pts_sphere) {
+        std::vector<std::pair<Eigen::Vector3d, float>>
+            pts_spherical_aligned_direction;
+        for (auto &pc : pts_spherical_aligned) {
           Eigen::Vector3d pts;
           pts << direction_x * pc.first[0], direction_y * pc.first[1],
               (direction_x * direction_y) * pc.first[2];
-          cur_pts_sphere_direction.push_back({pts, pc.second});
+          pts_spherical_aligned_direction.push_back({pts, pc.second});
         }
 
         Eigen::VectorXd signature_ct, signature_ci;
-        m2dp->getSignature(cur_pts_sphere_direction, signature_ct, signature_ci,
-                           lidarRange);
+        m2dp->getSignature(pts_spherical_aligned_direction, signature_ct,
+                           signature_ci, lidarRange);
 
         // record historyM2DP
         Eigen::VectorXd signature(historyM2DP.cols());
@@ -74,11 +75,12 @@ int main(int argc, char **argv) {
             .count();
     total_time += ttOpt;
 
-    printProgress(float(pts_i) / pts_sphere_vec.size());
+    printProgress(float(pts_i) / pts_spherical_vec.size());
   }
   std::cout << std::endl
             << "M2DP average time: "
-            << 1000.0 * total_time / pts_sphere_vec.size() << "ms" << std::endl;
+            << 1000.0 * total_time / pts_spherical_vec.size() << "ms"
+            << std::endl;
 
   std::ofstream m2dp_file_stream;
   m2dp_file_stream.open(m2dp_file);
