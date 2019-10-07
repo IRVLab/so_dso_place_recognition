@@ -1,7 +1,7 @@
 <launch>
   <node name="so_dso_gist" pkg="so_dso_place_recognition" type="test_gist" output="screen">
     <param name="incoming_id_file" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/06/incoming_id_file.txt" />
-    <param name="bag" value="/home/jiawei/Workspace/data/bags/KITTI/seq06.bag" />
+    <param name="bag" value="/home/moxxx066/Workspace/data/bags/KITTI/seq06.bag" />
     <param name="img_topic" value="/left/image_raw" />
     <param name="gist_file" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/06/historyGIST.txt" />
   </node>

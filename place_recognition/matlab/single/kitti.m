@@ -1,11 +1,10 @@
-clear
-close all
+clear close all
 
-% type = 'M2DP';
+    % type = 'M2DP';
 % type = 'SC';
 % type = 'DELIGHT';
 % type = 'GIST';
-type = 'FBoW';
+type = 'BoW';
 
 start_idx = 20;
 end_idx = 20;
@@ -14,28 +13,30 @@ loop_dist = 10;
 incoming_id = load('../../results/KITTI/06/incoming_id_file.txt');
 gt_full = load('../../results/KITTI/06/gt.txt');
 
-incoming_id = incoming_id(start_idx+1:size(incoming_id,1)-end_idx, :)+1;
-gt = gt_full(incoming_id,:);
-gt_xy = alignZ(gt(:,[4,8,12]));
+incoming_id = incoming_id(start_idx + 1
+                          : size(incoming_id, 1) - end_idx,
+                          :) +
+              1;
+gt = gt_full(incoming_id, :);
+gt_xy = alignZ(gt( :, [ 4, 8, 12 ]));
 
-if ~strcmp(type, 'FBoW')
-    hist = load(strcat(strcat(strcat('../../results/KITTI/06/history'), type), '.txt'));
+if
+  ~strcmp(type, 'BoW') hist = load(
+      strcat(strcat(strcat('../../results/KITTI/06/history'), type), '.txt'));
 end
 
-% get distance matrix
-switch type
-    case 'M2DP'
-        [dist_m, dist_m_t, dist_m_i] = processM2DP(hist, start_idx, end_idx, mask_width);
+    % get distance matrix switch type case 'M2DP'[dist_m, dist_m_t, dist_m_i] =
+    processM2DP(hist, start_idx, end_idx, mask_width);
     case 'SC'
         [dist_m, dist_m_t, dist_m_i] = processSC(hist, start_idx, end_idx, mask_width);
     case 'DELIGHT'
         dist_m = processDELIGHT(hist, start_idx, end_idx, mask_width);
     case 'GIST'
         dist_m = processGIST(hist, start_idx, end_idx, mask_width);
-    case 'FBoW'
-        dist_m = load('../../results/KITTI/06/FBoW/diff_mat.txt');
+    case 'BoW'
+        dist_m = load('../../results/KITTI/06/BoW/diff_mat.txt');
         dist_m = dist_m(start_idx+1:size(dist_m,1)-end_idx, start_idx+1:size(dist_m,2)-end_idx);
-        dist_m = 1-dist_m;
+    dist_m = 1 - dist_m;
         for i=1:size(dist_m,1)
             for j=1:size(dist_m,2)
                 if(abs(i-j)<mask_width)
