@@ -15,7 +15,7 @@
 #include "place_recognition/src/utils/print_progress.h"
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "test_fbow");
+  ros::init(argc, argv, "test_bow");
   ros::NodeHandle nhPriv("~");
   std::string id_file, bag_file, bag2, img_topic, output_folder;
   if (!nhPriv.getParam("incoming_id_file", id_file) ||
