@@ -18,7 +18,7 @@ set(SODSOSystem_SOURCE_FILES
 )
 
 include_directories(${DSO_INCLUDE_DIRS} src)
-add_executable(so_dso_node src/so_dso_node.cpp ${SODSOSystem_SOURCE_FILES} src/output_wrappers/OutputWrapperLoop.cpp src/ScaleOptimizer.cpp)
+add_executable(so_dso_node src/so_dso_node.cpp ${SODSOSystem_SOURCE_FILES} src/output_wrappers/OutputWrapperSODSO.cpp src/ScaleOptimizer.cpp)
 target_link_libraries(so_dso_node
     ${DSO_LIBRARY}
     ${Pangolin_LIBRARIES}
