@@ -34,7 +34,7 @@ function res = process(hist1, hist2)
             sig_i(2*k, :)   = permute_sc(hist1, i, k, true);
         end
         
-        diff_m = 1-sig_i * hist2';
+        diff_m = (1-sig_i * hist2')/2;
         diff_v = min(diff_m);
         res(i,:) = diff_v;
     end

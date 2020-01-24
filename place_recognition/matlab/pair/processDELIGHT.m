@@ -28,7 +28,7 @@ function dist = processDELIGHT(hist1, hist2, start_idx, end_idx)
         end
     end
 
-    dist = Inf*ones(m,n);
+    dist = zeros(m,n);
     % find the closest dist out of 4 configs for each loc in hist1
     B = hist2_vec_mut;
     for i=1:m

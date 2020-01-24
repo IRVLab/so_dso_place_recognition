@@ -1,49 +1,50 @@
-clear close all
+clear 
+close all
 
-    % type = 'M2DP';
-% type = 'SC';
+% type = 'M2DP';
+type = 'SC';
 % type = 'DELIGHT';
 % type = 'GIST';
-type = 'BoW';
+% type = 'BoW';
+
+kitti_path = '../../results/KITTI/00/';
 
 start_idx = 20;
 end_idx = 20;
-mask_width = 50;
+mask_width = 100;
 loop_dist = 10;
-incoming_id = load('../../results/KITTI/06/incoming_id_file.txt');
-gt_full = load('../../results/KITTI/06/gt.txt');
+incoming_id = load(strcat(kitti_path, 'incoming_id_file.txt'));
+gt_full = load(strcat(kitti_path, 'gt.txt'));
 
-incoming_id = incoming_id(start_idx + 1
-                          : size(incoming_id, 1) - end_idx,
-                          :) +
-              1;
+incoming_id = incoming_id(start_idx + 1: size(incoming_id, 1) - end_idx,:)+1;
 gt = gt_full(incoming_id, :);
-gt_xy = alignZ(gt( :, [ 4, 8, 12 ]));
 
-if
-  ~strcmp(type, 'BoW') hist = load(
-      strcat(strcat(strcat('../../results/KITTI/06/history'), type), '.txt'));
+if ~strcmp(type, 'BoW') 
+    hist = load(strcat(strcat(strcat(strcat(kitti_path, 'history')), type), '.txt'));
 end
 
-    % get distance matrix switch type case 'M2DP'[dist_m, dist_m_t, dist_m_i] =
-    processM2DP(hist, start_idx, end_idx, mask_width);
+    % get distance matrix 
+switch type 
+    case 'M2DP'
+        [dist_m, dist_m_t, dist_m_i] = processM2DP(hist, start_idx, end_idx);
     case 'SC'
-        [dist_m, dist_m_t, dist_m_i] = processSC(hist, start_idx, end_idx, mask_width);
+        [dist_m, dist_m_t, dist_m_i] = processSC(hist, start_idx, end_idx);
     case 'DELIGHT'
-        dist_m = processDELIGHT(hist, start_idx, end_idx, mask_width);
+        dist_m = processDELIGHT(hist, start_idx, end_idx);
     case 'GIST'
-        dist_m = processGIST(hist, start_idx, end_idx, mask_width);
+        dist_m = processGIST(hist, start_idx, end_idx);
     case 'BoW'
-        dist_m = load('../../results/KITTI/06/BoW/diff_mat.txt');
+        dist_m = load(strcat(kitti_path, 'BoW/diff_mat.txt'));
         dist_m = dist_m(start_idx+1:size(dist_m,1)-end_idx, start_idx+1:size(dist_m,2)-end_idx);
-    dist_m = 1 - dist_m;
-        for i=1:size(dist_m,1)
-            for j=1:size(dist_m,2)
-                if(abs(i-j)<mask_width)
-                    dist_m(i,j) = Inf;
-                end
-            end
+        dist_m = 1 - dist_m;
+end
+    
+for i=1:size(dist_m,1)
+    for j=1:size(dist_m,2)
+        if(abs(i-j)<mask_width)
+            dist_m(i,j) = Inf;
         end
+    end
 end
 
 % get closest distance for each index
@@ -106,30 +107,39 @@ AUC = trapz(recall,precision)
 title(strcat(strcat(strcat('Precision-Recall(', num2str(top_recall)), '), AUC='), num2str(AUC)));
 
 %% show trajectory
+% top_count = 250;
 subplot(1,2,2)
-plot(gt_xy(:,1), gt_xy(:,2), '.-')
+plot3(gt(:,4), gt(:,8), gt(:,12), '.-')
 hold on
-plot(gt_xy(lp_gt(:,1),1), gt_xy(lp_gt(:,1),2), 'go')
-hold on
-plot(gt_xy(lp_gt(:,2),1), gt_xy(lp_gt(:,2),2), 'go')
-hold on
+% plot3(gt(lp_gt(:,1),4), gt(lp_gt(:,1),8), gt(lp_gt(:,1),12), 'g.')
+% hold on
+% plot3(gt(lp_gt(:,2),4), gt(lp_gt(:,2),8), gt(lp_gt(:,2),12), 'g.')
+% hold on
 lp_detected = [dist_rank(1:top_count)', dist_idx(dist_rank(1:top_count))'];
 for i=1:size(lp_detected,1)
-    plot([gt_xy(lp_detected(i,1),1);gt_xy(lp_detected(i,2),1)],[gt_xy(lp_detected(i,1),2);gt_xy(lp_detected(i,2),2)],'r-')
+    plot3([gt(lp_detected(i,1),4);gt(lp_detected(i,2),4)],[gt(lp_detected(i,1),8);gt(lp_detected(i,2),8)],[gt(lp_detected(i,1),12);gt(lp_detected(i,2),12)],'ro')
     hold on
 end
+axis equal
 title('Trajectory')
 
 %% show individual results and intersection for M2DP and SC
 % top_count = 300;
 if strcmp(type, 'M2DP') || strcmp(type, 'SC')
+    for i=1:size(dist_m,1)
+        for j=1:size(dist_m,2)
+            if(abs(i-j)<mask_width)
+                dist_m_t(i,j) = Inf;
+                dist_m_i(i,j) = Inf;
+            end
+        end
+    end
     [dist_v_t, dist_t_idx] = min(dist_m_t);
     [~, rank_t] = sort(dist_v_t);
     [dist_v_i, dist_i_idx] = min(dist_m_i);
     [~, rank_i] = sort(dist_v_i);
     [dist_v_ti, dist_ti_idx] = min(dist_m);
     [~, rank_ti] = sort(dist_v_ti);
-    % top_count = 100;
     lp_t = [rank_t(1:top_count)', dist_t_idx(rank_t(1:top_count))'];
     lp_i = [rank_i(1:top_count)', dist_i_idx(rank_i(1:top_count))'];
     lp_ti = [rank_ti(1:top_count)', dist_ti_idx(rank_ti(1:top_count))'];
