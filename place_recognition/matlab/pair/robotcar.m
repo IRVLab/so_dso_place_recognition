@@ -1,4 +1,5 @@
-clear close all
+clear 
+close all
 
 % type = 'M2DP';
 type = 'SC';

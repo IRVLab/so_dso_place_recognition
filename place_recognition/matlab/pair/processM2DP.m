@@ -19,7 +19,7 @@ end
 function diff_m = process(hist1, hist2)
     m = size(hist1,1)/4;
     n = size(hist2,1)/4;
-    res_full = 1-hist1*hist2';
+    res_full = (1-hist1*hist2')/2;
     diff_m = zeros(m,n);
     for i=1:m
         for j=1:n
