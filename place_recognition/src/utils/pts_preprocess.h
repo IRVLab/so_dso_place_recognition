@@ -11,8 +11,8 @@
 #include "PosesPts.h"
 #include "pts_filter.h"
 
-#define PTS_HIST 6
 #define INIT_FRAME 30
+#define PTS_LIFE 6
 
 typedef pcl::PointCloud<pcl::PointXYZI> PointCloud;
 
@@ -50,7 +50,7 @@ void read_poses_pts(const std::string &poses_history_file_name,
   pts_history_file.close();
 }
 
-void get_spherical_pts(
+void generate_spherical_points(
     const IDPose *cur_pose, std::vector<IDPtIntensity *> &nearby_pts,
     std::vector<std::pair<Eigen::Vector3d, float>> &pts_spherical,
     double lidarRange, double voxelAngle) {
@@ -59,23 +59,31 @@ void get_spherical_pts(
     Eigen::Vector4d p_g(p->pt(0), p->pt(1), p->pt(2), 1.0);
     Eigen::Vector3d p_l = cur_pose->w2c * p_g;
 
+    // if (id_pose_wc.find(pt->incoming_id) == id_pose_wc.end()) {
+    //   continue; // orientation changed too much
+    // }
+
+    // if (pt.norm() >= lidar_range) {
+    //   continue; // out of range
+    // }
     if (p_l.norm() < lidarRange) {
       pts_spherical_raw.push_back(
           new IDPtIntensity(p->incoming_id, p_l, p->intensity));
     } else if (p_l(2) < 0 ||
-               (cur_pose->incoming_id - p->incoming_id) > PTS_HIST)
+               cur_pose->incoming_id - p->incoming_id > PTS_LIFE) {
       continue;
+    }
 
     new_nearby_pts.push_back(p);
   }
   nearby_pts = new_nearby_pts; // update nearby pts
 
   // filter points
-  // filterPoints(pts_spherical_raw, {voxelAngle,voxel_size,voxelAngle},
-  // pts_spherical); filterPointsPolar(pts_spherical_raw, lidarRange, {1,1,0.1},
-  // pts_spherical);
-  filterPointsPolar(pts_spherical_raw, lidarRange, {voxelAngle, voxelAngle, 1},
-                    pts_spherical, false);
+  // filterPoints(pts_spherical_raw, lidarRange, {30, 60, 30}, pts_spherical);
+  double voxelAngleRad = voxelAngle / 180 * M_PI;
+  filterPointsPolar(pts_spherical_raw,
+                    {voxelAngleRad, voxelAngleRad, voxelAngleRad},
+                    pts_spherical);
 
   printf("\rFrame count: %d, Pts (Total: %lu, Sphere: %lu, Filtered: %lu)",
          cur_pose->incoming_id, nearby_pts.size(), pts_spherical_raw.size(),
@@ -111,8 +119,8 @@ void pts_preprocess(std::string &poses_history_file,
 
     // retrive new pts
     while (pts_idx < pts_history.size() &&
-           std::abs(cur_pose->incoming_id - pts_history[pts_idx]->incoming_id) <
-               PTS_HIST) {
+           pts_history[pts_idx]->incoming_id - cur_pose->incoming_id <
+               PTS_LIFE) {
       nearby_pts.push_back(pts_history[pts_idx]);
       pts_idx++;
     }
@@ -125,8 +133,8 @@ void pts_preprocess(std::string &poses_history_file,
 
     // get sphere pts
     pts_spherical.clear();
-    get_spherical_pts(cur_pose, nearby_pts, pts_spherical, lidarRange,
-                      voxelAngle);
+    generate_spherical_points(cur_pose, nearby_pts, pts_spherical, lidarRange,
+                              voxelAngle);
     pts_spherical_vec.push_back(pts_spherical);
     pts_count += pts_spherical.size();
 
@@ -137,7 +145,7 @@ void pts_preprocess(std::string &poses_history_file,
       std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
           .count();
   std::cout << std::endl
-            << "get_spherical_pts average time: "
+            << "generate_spherical_points average time: "
             << 1000.0 * ttOpt / pts_spherical_vec.size();
   std::cout << "ms average points: "
             << float(pts_count) / pts_spherical_vec.size() << std::endl;
