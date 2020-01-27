@@ -7,7 +7,6 @@
 
 #include "DELIGHT.h"
 #include "place_recognition/src/utils/print_progress.h"
-#include "place_recognition/src/utils/pts_align.h"
 #include "place_recognition/src/utils/pts_preprocess.h"
 
 int main(int argc, char **argv) {
@@ -27,14 +26,13 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  double lidarRange, voxelAngle;
+  double lidarRange;
   nhPriv.param("lidarRange", lidarRange, 45.0);
-  nhPriv.param("voxelAngle", voxelAngle, 1.0);
 
   // process points
   std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_spherical_vec;
   pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
-                 lidarRange, voxelAngle, pts_spherical_vec);
+                 lidarRange, pts_spherical_vec);
 
   DELIGHT *delight = new DELIGHT();
   Eigen::MatrixXd historyDELIGHT = Eigen::MatrixXd(
@@ -42,12 +40,9 @@ int main(int argc, char **argv) {
 
   float total_time = 0.0;
   for (int pts_i = 0; pts_i < pts_spherical_vec.size(); pts_i++) {
-    std::vector<std::pair<Eigen::Vector3d, float>> pts_spherical_aligned;
-    align_points_PCA(pts_spherical_vec[pts_i], pts_spherical_aligned);
-
     Eigen::MatrixXd signature;
     std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-    delight->getSignature(pts_spherical_aligned, signature);
+    delight->getSignature(pts_spherical_vec[pts_i], signature);
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     float ttOpt =
         std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)

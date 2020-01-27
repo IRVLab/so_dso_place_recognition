@@ -1,21 +1,16 @@
 #include "DELIGHT.h"
+#include "place_recognition/src/utils/pts_align.h"
 
-#define PI 3.1415926
-
-DELIGHT::DELIGHT() {
-  inner_radius = 10;
-  bins = 256;
-}
-
-DELIGHT::DELIGHT(float _inner_radius, int _bins)
-    : inner_radius(_inner_radius), bins(_bins) {}
-
-unsigned int DELIGHT::getSignatureSize() { return bins; }
+unsigned int DELIGHT::getSignatureSize() { return BINS; }
 
 void DELIGHT::getSignature(
-    const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr,
+    const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_raw,
     Eigen::MatrixXd &output) {
-  output = Eigen::MatrixXd::Zero(16, bins);
+  // align points by PCA
+  std::vector<std::pair<Eigen::Vector3d, float>> pts_clr;
+  align_points_PCA(pts_clr_raw, pts_clr);
+
+  output = Eigen::MatrixXd::Zero(16, BINS);
   for (auto &p : pts_clr) {
     float x = p.first(0);
     float y = p.first(1);
@@ -23,7 +18,7 @@ void DELIGHT::getSignature(
     float d = p.first.norm();
     float clr = p.second;
 
-    int hist = 8 * (d > inner_radius) + 4 * (z > 0) + 2 * (y > 0) + 1 * (x > 0);
+    int hist = 8 * (d > RADIUS) + 4 * (z > 0) + 2 * (y > 0) + 1 * (x > 0);
     output(hist, int(clr))++;
   }
 }

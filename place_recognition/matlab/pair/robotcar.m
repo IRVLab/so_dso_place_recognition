@@ -11,18 +11,19 @@ dates = ["2014-07-14-14-49-50"; "2014-11-28-12-07-13"; "2014-12-12-10-45-15";
          "2015-02-10-11-58-05"; "2015-05-19-14-06-38"; "2015-05-22-11-14-30";
          "2015-08-13-16-02-58"; "2015-10-30-13-52-14"];
 
-run_seq = [ 5, 6; 5, 7; 5, 8; 5, 4; 7, 1; 7, 8; 7, 4; 8, 2; 8, 4; 4, 3 ];
+run_seq = [5,6; 5,7; 5,8; 5,4; 7,1; 7,8; 7,4; 8,2; 8,4; 4,3];
 
 TRs = zeros(1, size(run_seq, 1));
 AUCs = zeros(1, size(run_seq, 1));
-% for seqi=1:size(run_seq,1)
-for seqi=7
+for seqi=1:size(run_seq,1)
+% for seqi=7
     run1 = dates(run_seq(seqi,1));
-    run2 = dates(run_seq(seqi, 2));
+    run2 = dates(run_seq(seqi,2));
     [ AUCs(seqi), TRs(seqi) ] = run_test(run1, run2, seqi, type);
     pause(0.5);
 end
-AUCs TRs
+AUCs 
+TRs
 
 function [AUC, top_recall] = run_test(run1, run2, run_count, type) 
 start_idx = 0;

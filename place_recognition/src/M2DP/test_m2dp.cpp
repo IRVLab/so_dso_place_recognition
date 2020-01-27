@@ -26,16 +26,15 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  double lidarRange, voxelAngle;
+  double lidarRange;
   nhPriv.param("lidarRange", lidarRange, 45.0);
-  nhPriv.param("voxelAngle", voxelAngle, 1.0);
 
   // process points
   std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_spherical_vec;
   pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
-                 lidarRange, voxelAngle, pts_spherical_vec);
+                 lidarRange, pts_spherical_vec);
 
-  M2DP *m2dp = new M2DP();
+  M2DP *m2dp = new M2DP(lidarRange);
   Eigen::MatrixXd historyM2DP = Eigen::MatrixXd(4 * pts_spherical_vec.size(),
                                                 2 * m2dp->getSignatureSize());
 
@@ -60,7 +59,7 @@ int main(int argc, char **argv) {
 
         Eigen::VectorXd signature_ct, signature_ci;
         m2dp->getSignature(pts_spherical_aligned_direction, signature_ct,
-                           signature_ci, lidarRange);
+                           signature_ci);
 
         // record historyM2DP
         Eigen::VectorXd signature(historyM2DP.cols());

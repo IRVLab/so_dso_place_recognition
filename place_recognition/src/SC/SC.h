@@ -4,19 +4,20 @@
 #include <iostream>
 #include <vector>
 
+#define numS 60
+#define numR 20
+
 class SC {
 public:
-  SC();
-  SC(int s, int r);
+  SC(double max_rho);
 
   unsigned int getSignatureSize();
 
-  void
-  getSignature(const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr,
-               Eigen::VectorXd &structure_output,
-               Eigen::VectorXd &intensity_output, double max_rho = -1.0);
+  void getSignature(
+      const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_raw,
+      Eigen::VectorXd &structure_output, Eigen::VectorXd &intensity_output);
 
 private:
-  int numS;
-  int numR;
+  double S_res_inv;
+  double R_res_inv;
 };

@@ -1,7 +1,4 @@
 <launch>
-  <arg name="folder" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/00" />
-  <!-- <arg name="folder" value="$(find so_dso_place_recognition)/place_recognition/results/Tara/grass" /> -->
-
   <!-- <arg name="date" value="2014-07-14-14-49-50" /> -->
   <!-- <arg name="date" value="2014-11-28-12-07-13" /> -->
   <!-- <arg name="date" value="2014-12-12-10-45-15" /> -->
@@ -9,8 +6,9 @@
   <!-- <arg name="date" value="2015-05-19-14-06-38" /> -->
   <!-- <arg name="date" value="2015-05-22-11-14-30" /> -->
   <!-- <arg name="date" value="2015-08-13-16-02-58" /> -->
-  <!-- <arg name="date" value="2015-10-30-13-52-14" /> -->
-  <!-- <arg name="folder" value="$(find so_dso_place_recognition)/place_recognition/results/RobotCar/$(arg date)" /> -->
+  <arg name="date" value="2015-10-30-13-52-14" />
+  <arg name="folder" value="$(find so_dso_place_recognition)/place_recognition/results/RobotCar/$(arg date)" />
+  <!-- <arg name="folder" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/00" /> -->
 
   <node name="test_sc" pkg="so_dso_place_recognition" type="test_sc" output="screen" required="true">
     <param name="poses_history_file" value="$(arg folder)/poses_history_file.txt" />
@@ -18,8 +16,5 @@
     <param name="sc_file" value="$(arg folder)/historySC.txt" />
     <param name="incoming_id_file" value="$(arg folder)/incoming_id_file.txt" />
     <param name="lidarRange" value="45.0" />
-    <param name="voxelAngle" value="1.0" />
-    <!-- <param name="lidarRange" value="2.0" />
-    <param name="voxelAngle" value="2.0" /> -->
   </node>
 </launch>

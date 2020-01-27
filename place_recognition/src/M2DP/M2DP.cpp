@@ -1,20 +1,7 @@
 #include "M2DP.h"
 #include <cmath>
 
-M2DP::M2DP() {
-  numT = 16;
-  numR = 8;
-  numP = 4;
-  numQ = 16;
-
-  init();
-}
-
-M2DP::M2DP(int t, int r, int p, int q) : numT(t), numR(r), numP(p), numQ(q) {
-  init();
-}
-
-void M2DP::init() {
+M2DP::M2DP(double max_rho) {
   xProj_mat = Eigen::MatrixXd::Zero(3, numP * numQ);
   yProj_mat = Eigen::MatrixXd::Zero(3, numP * numQ);
 
@@ -41,27 +28,21 @@ void M2DP::init() {
       yProj_mat.col(p * numQ + q) = yProj;
     }
   }
+
+  S_res_inv = numS / (2.0 * M_PI);
+  R_res_inv = numR / max_rho;
 }
 
-unsigned int M2DP::getSignatureSize() { return numT * numR + numP * numQ; }
+unsigned int M2DP::getSignatureSize() { return numS * numR + numP * numQ; }
 
 void M2DP::getSignature(
     const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr,
-    Eigen::VectorXd &count_output, Eigen::VectorXd &intensity_coutput,
-    double max_rho) {
-  if (max_rho < 0) {
-    for (auto &pc : pts_clr) {
-      double curRho = pc.first.norm();
-      if (max_rho < curRho)
-        max_rho = curRho;
-    }
-  }
-
+    Eigen::VectorXd &count_output, Eigen::VectorXd &intensity_coutput) {
   // signature matrix A
   Eigen::MatrixXd pts_count =
-      Eigen::MatrixXd::Zero(numP * numQ, numT * numR); // pts count
+      Eigen::MatrixXd::Zero(numP * numQ, numS * numR); // pts count
   Eigen::MatrixXd pts_intensity =
-      Eigen::MatrixXd::Zero(numP * numQ, numT * numR); // intensity
+      Eigen::MatrixXd::Zero(numP * numQ, numS * numR); // intensity
 
   for (int p = 0; p < numP; p++) // loop on azimuth
   {
@@ -74,23 +55,20 @@ void M2DP::getSignature(
         // projection to polar coordinate
         double xp = xProj.dot(pts_clr[i].first);
         double yp = yProj.dot(pts_clr[i].first);
-        double rho = std::sqrt(xp * xp + yp * yp);
-        double theta = std::atan2(yp, xp);
-        while (theta < 0)
-          theta += 2.0 * M_PI;
-        while (theta >= 2.0 * M_PI)
-          theta -= 2.0 * M_PI;
 
-        // get projection bin w.r.t. theta and rho
-        int ti = theta / (2.0 * M_PI) * numT;
-        if (ti == numT)
-          ti = 0;
-        int ri = rho / max_rho * numR;
-        if (ri >= numR)
+        int si = static_cast<int>(floor((atan2(yp, xp) + M_PI) * S_res_inv));
+        int ri =
+            static_cast<int>(floor(std::sqrt(xp * xp + yp * yp) * R_res_inv));
+        int idx_pq = p * numQ + q;
+        int idx_sr = ri * numS + si;
+
+        // PCA moves the points
+        if (idx_pq >= numP * numQ || idx_sr >= numS * numR) {
           continue;
+        }
 
-        pts_count(p * numQ + q, ri * numT + ti)++;
-        pts_intensity(p * numQ + q, ri * numT + ti) += pts_clr[i].second;
+        pts_count(idx_pq, idx_sr)++;
+        pts_intensity(idx_pq, idx_sr) += pts_clr[i].second;
       }
     }
   }
@@ -104,7 +82,7 @@ void M2DP::getSignature(
 
   // binarize average intensity for each bin
   for (int i = 0; i < numP * numQ; i++) {
-    for (int j = 0; j < numR * numT; j++) {
+    for (int j = 0; j < numR * numS; j++) {
       if (pts_count(i, j)) {
         pts_intensity(i, j) = pts_intensity(i, j) / pts_count(i, j);
         pts_intensity(i, j) = pts_intensity(i, j) > ave_intensity ? 1 : 0;
