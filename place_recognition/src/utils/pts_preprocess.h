@@ -12,7 +12,6 @@
 #include "pts_filter.h"
 
 #define INIT_FRAME 30
-#define PTS_LIFE 6
 
 typedef pcl::PointCloud<pcl::PointXYZI> PointCloud;
 
@@ -59,31 +58,20 @@ void generate_spherical_points(
     Eigen::Vector4d p_g(p->pt(0), p->pt(1), p->pt(2), 1.0);
     Eigen::Vector3d p_l = cur_pose->w2c * p_g;
 
-    // if (id_pose_wc.find(pt->incoming_id) == id_pose_wc.end()) {
-    //   continue; // orientation changed too much
-    // }
-
-    // if (pt.norm() >= lidar_range) {
-    //   continue; // out of range
-    // }
     if (p_l.norm() < lidarRange) {
       pts_spherical_raw.push_back(
           new IDPtIntensity(p->incoming_id, p_l, p->intensity));
-    } else if (p_l(2) < 0 ||
-               cur_pose->incoming_id - p->incoming_id > PTS_LIFE) {
-      continue;
+      new_nearby_pts.push_back(p);
     }
-
-    new_nearby_pts.push_back(p);
   }
   nearby_pts = new_nearby_pts; // update nearby pts
 
   // filter points
-  // filterPoints(pts_spherical_raw, lidarRange, {30, 60, 30}, pts_spherical);
-  double voxelAngleRad = voxelAngle / 180 * M_PI;
-  filterPointsPolar(pts_spherical_raw,
-                    {voxelAngleRad, voxelAngleRad, voxelAngleRad},
-                    pts_spherical);
+  filterPoints(pts_spherical_raw, lidarRange, {30, 60, 30}, pts_spherical);
+  // double voxelAngleRad = voxelAngle / 180 * M_PI;
+  // filterPointsPolar(pts_spherical_raw,
+  //                   {voxelAngleRad, voxelAngleRad, voxelAngleRad},
+  //                   pts_spherical);
 
   printf("\rFrame count: %d, Pts (Total: %lu, Sphere: %lu, Filtered: %lu)",
          cur_pose->incoming_id, nearby_pts.size(), pts_spherical_raw.size(),
@@ -119,8 +107,7 @@ void pts_preprocess(std::string &poses_history_file,
 
     // retrive new pts
     while (pts_idx < pts_history.size() &&
-           pts_history[pts_idx]->incoming_id - cur_pose->incoming_id <
-               PTS_LIFE) {
+           pts_history[pts_idx]->incoming_id <= cur_pose->incoming_id) {
       nearby_pts.push_back(pts_history[pts_idx]);
       pts_idx++;
     }

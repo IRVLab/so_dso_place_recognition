@@ -43,6 +43,10 @@ void filterPoints(vector<IDPtIntensity *> &inPtsI, double lidar_range,
     Eigen::Vector3d pt = l_ip.second.second;
     outPtsI.push_back({pt, inPtsI[idx]->intensity});
   }
+
+  for (int idx = 0; idx < inPtsI.size(); idx++) {
+    delete inPtsI[idx];
+  }
 }
 
 void filterPointsPolar(vector<IDPtIntensity *> &inPtsI,
@@ -64,7 +68,7 @@ void filterPointsPolar(vector<IDPtIntensity *> &inPtsI,
         static_cast<int>(floor((atan2(pt(1), xz) + M_PI / 2) * ele_res_inv));
     int loc = azi + ele * azi_bins;
 
-    // store the highest points
+    // store the closest points
     if (loc2idx_pt.find(loc) == loc2idx_pt.end() ||
         loc2idx_pt[loc].second.norm() > pt.norm()) {
       loc2idx_pt[loc] = {idx, pt};
@@ -76,5 +80,9 @@ void filterPointsPolar(vector<IDPtIntensity *> &inPtsI,
     int idx = l_ip.second.first;
     Eigen::Vector3d pt = l_ip.second.second;
     outPtsI.push_back({pt, inPtsI[idx]->intensity});
+  }
+
+  for (int idx = 0; idx < inPtsI.size(); idx++) {
+    delete inPtsI[idx];
   }
 }
