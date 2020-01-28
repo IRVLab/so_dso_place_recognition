@@ -1,11 +1,7 @@
 clear 
 close all
 
-% type = 'M2DP';
-type = 'SC';
-% type = 'DELIGHT';
-% type = 'GIST';
-% type = 'BoW';
+types = ["SC","M2DP","DELIGHT","GIST","BoW";];
 
 dates = ["2014-07-14-14-49-50"; "2014-11-28-12-07-13"; "2014-12-12-10-45-15";
          "2015-02-10-11-58-05"; "2015-05-19-14-06-38"; "2015-05-22-11-14-30";
@@ -13,14 +9,18 @@ dates = ["2014-07-14-14-49-50"; "2014-11-28-12-07-13"; "2014-12-12-10-45-15";
 
 run_seq = [5,6; 5,7; 5,8; 5,4; 7,1; 7,8; 7,4; 8,2; 8,4; 4,3];
 
-TRs = zeros(1, size(run_seq, 1));
-AUCs = zeros(1, size(run_seq, 1));
-for seqi=1:size(run_seq,1)
-% for seqi=7
-    run1 = dates(run_seq(seqi,1));
-    run2 = dates(run_seq(seqi,2));
-    [ AUCs(seqi), TRs(seqi) ] = run_test(run1, run2, seqi, type);
-    pause(0.5);
+TRs = zeros(size(types, 2), size(run_seq, 1));
+AUCs = zeros(size(types, 2), size(run_seq, 1));
+
+for ti=1:size(types,2)
+% for ti=2
+    for si=1:size(run_seq,1)
+    % for seqi=7
+        run1 = dates(run_seq(si,1));
+        run2 = dates(run_seq(si,2));
+        [AUCs(ti, si), TRs(ti, si)] = run_test(run1, run2, si, types(ti));
+        pause(0.5);
+    end
 end
 AUCs 
 TRs
@@ -44,7 +44,7 @@ if (~strcmp(type, 'BoW'))
     hist2 = load(strcat(strcat(strcat(strcat('../../results/RobotCar/', run2), '/history'), type), '.txt'));
 end
 
-tic 
+% tic 
 % get difference matrix 
 switch type 
     case 'M2DP' 
@@ -60,7 +60,7 @@ switch type
         diff_m = diff_m(start_idx+1:size(diff_m,1)-end_idx, start_idx+1:size(diff_m,2)-end_idx);
         diff_m = 1 - diff_m;
 end
-toc
+% toc
 
 [AUC, top_recall] = getAUCandPlot(diff_m, gt1, gt2, loop_diff, run_count);
 end

@@ -2,12 +2,12 @@ clear
 close all
 
 % type = 'M2DP';
-type = 'SC';
-% type = 'DELIGHT';
+% type = 'SC';
+type = 'DELIGHT';
 % type = 'GIST';
 % type = 'BoW';
 
-kitti_path = '../../results/KITTI/00/';
+kitti_path = '../../results/KITTI/06/';
 
 start_idx = 20;
 end_idx = 20;

@@ -7,7 +7,6 @@
 
 # Code Explaination
 - utils/pts_preprocess: accumulates points locally, extracts a spherical point cloud by pose. 
-- utils/pts_filter: filters the spherical point cloud in a polar coordinate.
 - utils/pts_align: aligns the point cloud by PCA.
 - src/X/X: X algorithm to describe the filtered spherical point cloud.
 - src/X/test_X: calls the above functions.

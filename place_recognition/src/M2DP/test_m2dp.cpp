@@ -32,18 +32,18 @@ int main(int argc, char **argv) {
   // process points
   std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_spherical_vec;
   pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
-                 lidarRange, pts_spherical_vec);
+                 lidarRange, pts_spherical_vec, true);
 
   M2DP *m2dp = new M2DP(lidarRange);
-  Eigen::MatrixXd historyM2DP = Eigen::MatrixXd(4 * pts_spherical_vec.size(),
-                                                2 * m2dp->getSignatureSize());
+  Eigen::MatrixXd history_m2dp = Eigen::MatrixXd(4 * pts_spherical_vec.size(),
+                                                 2 * m2dp->getSignatureSize());
 
   float total_time = 0.0;
   for (int pts_i = 0; pts_i < pts_spherical_vec.size(); pts_i++) {
+    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+
     std::vector<std::pair<Eigen::Vector3d, float>> pts_spherical_aligned;
     align_points_PCA(pts_spherical_vec[pts_i], pts_spherical_aligned);
-
-    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
     int history_subrow = 0;
     for (int direction_x = -1; direction_x < 2; direction_x += 2) {
       for (int direction_y = -1; direction_y < 2; direction_y += 2) {
@@ -61,10 +61,10 @@ int main(int argc, char **argv) {
         m2dp->getSignature(pts_spherical_aligned_direction, signature_ct,
                            signature_ci);
 
-        // record historyM2DP
-        Eigen::VectorXd signature(historyM2DP.cols());
+        // record history_m2dp
+        Eigen::VectorXd signature(history_m2dp.cols());
         signature << signature_ct, signature_ci;
-        historyM2DP.row(4 * pts_i + history_subrow++) = signature.transpose();
+        history_m2dp.row(4 * pts_i + history_subrow++) = signature.transpose();
       }
     }
 
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
 
   std::ofstream m2dp_file_stream;
   m2dp_file_stream.open(m2dp_file);
-  m2dp_file_stream << historyM2DP;
+  m2dp_file_stream << history_m2dp;
   m2dp_file_stream.close();
 
   delete m2dp;
