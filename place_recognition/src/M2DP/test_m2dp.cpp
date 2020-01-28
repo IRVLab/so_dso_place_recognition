@@ -40,10 +40,10 @@ int main(int argc, char **argv) {
 
   float total_time = 0.0;
   for (int pts_i = 0; pts_i < pts_spherical_vec.size(); pts_i++) {
+    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+
     std::vector<std::pair<Eigen::Vector3d, float>> pts_spherical_aligned;
     align_points_PCA(pts_spherical_vec[pts_i], pts_spherical_aligned);
-
-    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
     int history_subrow = 0;
     for (int direction_x = -1; direction_x < 2; direction_x += 2) {
       for (int direction_y = -1; direction_y < 2; direction_y += 2) {
