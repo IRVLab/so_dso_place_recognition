@@ -1,35 +1,30 @@
 #include "SC.h"
+#include "place_recognition/src/utils/pts_align.h"
 #include <cmath>
 
-SC::SC() {
-  numS = 60;
-  numR = 20;
+SC::SC(double max_rho) {
+  S_res_inv = numS / (2.0 * M_PI);
+  R_res_inv = numR / max_rho;
 }
-
-SC::SC(int s, int r) : numS(s), numR(r) {}
 
 unsigned int SC::getSignatureSize() { return numS * numR; }
 
 void SC::getSignature(
-    const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr,
-    Eigen::VectorXd &structure_output, Eigen::VectorXd &intensity_output,
-    double max_rho) {
-  if (max_rho < 0) {
-    for (auto &pc : pts_clr) {
-      double curRho = pc.first.norm();
-      if (max_rho < curRho)
-        max_rho = curRho;
-    }
-  }
+    const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_raw,
+    Eigen::VectorXd &structure_output, Eigen::VectorXd &intensity_output) {
+  // align points by PCA
+  std::vector<std::pair<Eigen::Vector3d, float>> pts_clr;
+  align_points_PCA(pts_clr_raw, pts_clr);
 
   // signature matrix A
-  Eigen::VectorXd pts_count = Eigen::VectorXd::Zero(numS * numR); // pts count
+  Eigen::VectorXd pts_count =
+      Eigen::VectorXd::Zero(getSignatureSize()); // pts count
   Eigen::VectorXd height_lowest =
-      Eigen::VectorXd::Zero(numS * numR); // height lowest
+      Eigen::VectorXd::Zero(getSignatureSize()); // height lowest
   Eigen::VectorXd height_highest =
-      Eigen::VectorXd::Zero(numS * numR); // height highest
+      Eigen::VectorXd::Zero(getSignatureSize()); // height highest
   Eigen::VectorXd pts_intensity =
-      Eigen::VectorXd::Zero(numS * numR); // intensity
+      Eigen::VectorXd::Zero(getSignatureSize()); // intensity
 
   for (int i = 0; i < pts_clr.size(); i++) // loop on pts
   {
@@ -38,34 +33,27 @@ void SC::getSignature(
     double yp = pts_clr[i].first(1);
     double zp = pts_clr[i].first(2);
 
-    double rho = std::sqrt(yp * yp + zp * zp);
-    double theta = std::atan2(zp, yp);
-    while (theta < 0)
-      theta += 2.0 * M_PI;
-    while (theta >= 2.0 * M_PI)
-      theta -= 2.0 * M_PI;
-
     // get projection bin w.r.t. theta and rho
-    int si = theta / (2.0 * M_PI) * numS;
-    if (si == numS)
-      si = 0;
-    int ri = rho / max_rho * numR;
-    if (ri >= numR)
-      continue;
+    int si = static_cast<int>(floor((atan2(zp, yp) + M_PI) * S_res_inv));
+    int ri = static_cast<int>(floor(std::sqrt(yp * yp + zp * zp) * R_res_inv));
+    int idx = si * numR + ri;
 
-    if (pts_count(si * numR + ri) == 0) {
-      pts_intensity(si * numR + ri) = pts_clr[i].second;
-      height_lowest(si * numR + ri) = pts_clr[i].first(0);
-      height_highest(si * numR + ri) = pts_clr[i].first(0);
-    } else {
-      pts_intensity(si * numR + ri) += double(pts_clr[i].second);
-      height_lowest(si * numR + ri) =
-          std::min(height_lowest(si * numR + ri), pts_clr[i].first(0));
-      height_highest(si * numR + ri) =
-          std::max(height_highest(si * numR + ri), pts_clr[i].first(0));
+    // PCA moves the points
+    if (idx >= getSignatureSize()) {
+      continue;
     }
 
-    pts_count(si * numR + ri)++;
+    if (pts_count(idx) == 0) {
+      pts_intensity(idx) = pts_clr[i].second;
+      height_lowest(idx) = pts_clr[i].first(0);
+      height_highest(idx) = pts_clr[i].first(0);
+    } else {
+      pts_intensity(idx) += double(pts_clr[i].second);
+      height_lowest(idx) = std::min(height_lowest(idx), pts_clr[i].first(0));
+      height_highest(idx) = std::max(height_highest(idx), pts_clr[i].first(0));
+    }
+
+    pts_count(idx)++;
   }
 
   // average intensity
@@ -76,7 +64,7 @@ void SC::getSignature(
   ave_intensity = ave_intensity / pts_clr.size();
 
   // binarize average intensity for each bin
-  for (int i = 0; i < numS * numR; i++) {
+  for (int i = 0; i < getSignatureSize(); i++) {
     if (pts_count(i)) {
       pts_intensity(i) = pts_intensity(i) / pts_count(i);
       pts_intensity(i) = pts_intensity(i) > ave_intensity ? 1 : 0;

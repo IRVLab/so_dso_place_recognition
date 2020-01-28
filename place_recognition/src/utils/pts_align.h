@@ -1,7 +1,10 @@
+#ifndef PTS_ALIGN_H
+#define PTS_ALIGN_H
+
 #include <Eigen/Core>
 #include <vector>
 
-void align_points_PCA(
+inline void align_points_PCA(
     const std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_in,
     std::vector<std::pair<Eigen::Vector3d, float>> &pts_clr_out) {
   double mx(0), my(0), mz(0);
@@ -41,3 +44,5 @@ void align_points_PCA(
         {Eigen::Vector3d(nx(i), ny(i), nz(i)), pts_clr_in[i].second});
   }
 }
+
+#endif
