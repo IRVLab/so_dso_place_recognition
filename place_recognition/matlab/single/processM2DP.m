@@ -1,5 +1,4 @@
-function [diff_m_ci, diff_m_c, diff_m_i] = processM2DP(hist, start_idx, end_idx)
-    hist = hist(4*start_idx+1:size(hist,1)-4*end_idx, :);
+function [diff_m_ci, diff_m_c, diff_m_i] = processM2DP(hist)
     hist_t = hist(:,1:size(hist,2)/2);
     hist_i = hist(:,size(hist,2)/2+1:end);
 

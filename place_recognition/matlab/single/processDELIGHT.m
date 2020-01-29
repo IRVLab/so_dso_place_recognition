@@ -1,11 +1,9 @@
-function dist = processDELIGHT(hist, start_idx, end_idx)
+function dist = processDELIGHT(hist)
     Mut = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16;
            6,5,8,7,2,1,4,3,14,13,16,15,10,9,12,11;
            7,8,5,6,3,4,1,2,15,16,13,14,11,12,9,10;
            4,3,2,1,8,7,6,5,12,11,10,9,16,15,14,13;];
        
-    hist = hist(16*start_idx+1:size(hist,1)-16*end_idx, :);
-
     m = size(hist,1)/16;
     dist = zeros(m,m);
     for i=1:m

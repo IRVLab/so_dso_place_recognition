@@ -1,41 +1,47 @@
 clear 
 close all
 
-% type = 'M2DP';
-% type = 'SC';
-type = 'DELIGHT';
-% type = 'GIST';
-% type = 'BoW';
+types = ["sc","m2dp","delight","gist","bow";];
 
-kitti_path = '../../results/KITTI/06/';
+run_seq = ["../../results/KITTI/00/", "../../results/KITTI/05/", "../../results/KITTI/06/"];
 
-start_idx = 20;
-end_idx = 20;
+TRs = zeros(size(types, 2), size(run_seq, 1));
+AUCs = zeros(size(types, 2), size(run_seq, 1));
+for ti=1:size(types,2)
+    for si=1:size(run_seq,2)
+        [AUCs(ti, si), TRs(ti, si)] = run_test(types(ti), run_seq(si));
+        pause(0.5);
+    end
+end
+AUCs 
+TRs
+
+function [AUC, top_recall] = run_test(type, path)
 mask_width = 100;
 loop_dist = 10;
-incoming_id = load(strcat(kitti_path, 'incoming_id_file.txt'));
-gt_full = load(strcat(kitti_path, 'gt.txt'));
 
-incoming_id = incoming_id(start_idx + 1: size(incoming_id, 1) - end_idx,:)+1;
+incoming_id = load(strcat(path, 'incoming_id_file.txt'));
+gt_full = load(strcat(path, 'gt.txt'));
+
+incoming_id = incoming_id+1;
 gt = gt_full(incoming_id, :);
 
-if ~strcmp(type, 'BoW') 
-    hist = load(strcat(strcat(strcat(strcat(kitti_path, 'history')), type), '.txt'));
+if ~strcmp(type, 'bow') 
+    hist = load(strcat(strcat(strcat(strcat(path, 'history_')), type), '.txt'));
 end
 
     % get distance matrix 
 switch type 
-    case 'M2DP'
-        [dist_m, dist_m_t, dist_m_i] = processM2DP(hist, start_idx, end_idx);
-    case 'SC'
-        [dist_m, dist_m_t, dist_m_i] = processSC(hist, start_idx, end_idx);
-    case 'DELIGHT'
-        dist_m = processDELIGHT(hist, start_idx, end_idx);
-    case 'GIST'
-        dist_m = processGIST(hist, start_idx, end_idx);
-    case 'BoW'
-        dist_m = load(strcat(kitti_path, 'BoW/diff_mat.txt'));
-        dist_m = dist_m(start_idx+1:size(dist_m,1)-end_idx, start_idx+1:size(dist_m,2)-end_idx);
+    case 'm2dp'
+        [dist_m, dist_m_t, dist_m_i] = processM2DP(hist);
+    case 'sc'
+        [dist_m, dist_m_t, dist_m_i] = processSC(hist);
+    case 'delight'
+        dist_m = processDELIGHT(hist);
+    case 'gist'
+        dist_m = processGIST(hist);
+    case 'bow'
+        dist_m = load(strcat(path, 'BoW/diff_mat.txt'));
         dist_m = 1 - dist_m;
 end
     
@@ -102,8 +108,7 @@ figure
 subplot(1,2,1)
 plot(recall, precision)
 axis([0 1 0 1])
-top_recall
-AUC = trapz(recall,precision)
+AUC = trapz(recall,precision);
 title(strcat(strcat(strcat('Precision-Recall(', num2str(top_recall)), '), AUC='), num2str(AUC)));
 
 %% show trajectory
@@ -125,7 +130,7 @@ title('Trajectory')
 
 %% show individual results and intersection for M2DP and SC
 % top_count = 300;
-if strcmp(type, 'M2DP') || strcmp(type, 'SC')
+if strcmp(type, 'm2dp') || strcmp(type, 'sc')
     for i=1:size(dist_m,1)
         for j=1:size(dist_m,2)
             if(abs(i-j)<mask_width)
@@ -157,15 +162,4 @@ if strcmp(type, 'M2DP') || strcmp(type, 'SC')
     title('Ground Truth');
 end
 
-%% project 3D to 2D
-function X = alignZ(XYZ)
-    xyz0=mean(XYZ);
-    A=bsxfun(@minus,XYZ,xyz0); %center the data
-    [~,~,V]=svd(A,0);
-    XYZ = A*V;
-    angle = XYZ(floor(size(XYZ,1)/4),1:2) - XYZ(1,1:2);
-    angle = atan2(angle(2), angle(1));
-    R = [cos(angle), sin(angle), 0; -sin(angle), cos(angle), 0; 0, 0, 1];
-    XYZ = XYZ * R';
-    X = XYZ - XYZ(1,:);
 end

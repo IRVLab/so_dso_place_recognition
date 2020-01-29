@@ -6,6 +6,6 @@
     <param name="bag1" value="/home/moxxx066/Workspace/data/bags/KITTI/seq$(arg seq).bag" />
     <param name="bag2" value="/home/moxxx066/Workspace/data/bags/KITTI/seq$(arg seq).bag" />
     <param name="img_topic" value="/left/image_raw" />
-    <param name="output_file" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/$(arg seq)/dist_mat.txt" />
+    <param name="output_file" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/$(arg seq)/diff_mat.txt" />
   </node>
 </launch>
