@@ -29,9 +29,9 @@ std::vector<cv::Mat> toDescriptorVector(const cv::Mat &Descriptors) {
   return vDesc;
 }
 
-void readDescFromBagByID(std::string incoming_id_file, std::string bag_file,
-                         std::string img_topic,
-                         std::vector<cv::Mat> &descriptors_vec) {
+void extractDescFromBagByID(std::string incoming_id_file, std::string bag_file,
+                            std::string img_topic,
+                            std::vector<cv::Mat> &descriptors_vec) {
   std::ifstream infile(incoming_id_file);
   std::vector<int> incoming_id_vec;
   int iid;
@@ -51,7 +51,7 @@ void readDescFromBagByID(std::string incoming_id_file, std::string bag_file,
   rosbag::View view(bag, rosbag::TopicQuery(topics));
 
   ORB_SLAM2::ORBextractor *mpORBextractor =
-      new ORB_SLAM2::ORBextractor(2000, 1.2, 8, 20, 7);
+      new ORB_SLAM2::ORBextractor(4000, 1.2, 8, 20, 7);
   int id_i(0), img_i(-1);
   float total_time = 0.0;
   BOOST_FOREACH (rosbag::MessageInstance const m, view) {
@@ -121,15 +121,18 @@ int main(int argc, char **argv) {
   mpORBVocabulary->loadFromTextFile(voc_file);
   std::cout << "Vocabulary loaded!" << std::endl << std::endl;
 
+  // Extract descriptors for each frame by ID
   std::vector<cv::Mat> desc_vec1, desc_vec2;
-  readDescFromBagByID(id1, bag1, img_topic, desc_vec1);
-  readDescFromBagByID(id2, bag2, img_topic, desc_vec2);
+  extractDescFromBagByID(id1, bag1, img_topic, desc_vec1);
+  if (bag1.compare(bag2) == 0) {
+    desc_vec2 = desc_vec1;
+  } else {
+    extractDescFromBagByID(id2, bag2, img_topic, desc_vec2);
+  }
 
-  std::vector<double> _tmp(desc_vec2.size(), 0.0);
-  std::vector<std::vector<double>> scores(desc_vec1.size(), _tmp);
-  int avgScore = 0;
-  std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+  // Transform to BoW vectors
   std::vector<DBoW2::BowVector> vbv1, vbv2;
+  std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
   for (size_t j = 0; j < desc_vec1.size(); ++j) {
     std::vector<cv::Mat> desc_vec1j = toDescriptorVector(desc_vec1[j]);
     DBoW2::BowVector bv;
@@ -137,14 +140,30 @@ int main(int argc, char **argv) {
     mpORBVocabulary->transform(desc_vec1j, bv, fv, 4);
     vbv1.push_back(bv);
   }
-  for (size_t j = 0; j < desc_vec2.size(); ++j) {
-    std::vector<cv::Mat> desc_vec2j = toDescriptorVector(desc_vec2[j]);
-    DBoW2::BowVector bv;
-    DBoW2::FeatureVector fv;
-    mpORBVocabulary->transform(desc_vec2j, bv, fv, 4);
-    vbv2.push_back(bv);
+  std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+  float ttOpt =
+      std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
+          .count();
+  std::cout << std::endl
+            << "BoW vector transform time: "
+            << 1000.0 * ttOpt / desc_vec1.size() << "ms" << std::endl;
+
+  if (bag1.compare(bag2) == 0) {
+    vbv2 = vbv1;
+  } else {
+    for (size_t j = 0; j < desc_vec2.size(); ++j) {
+      std::vector<cv::Mat> desc_vec2j = toDescriptorVector(desc_vec2[j]);
+      DBoW2::BowVector bv;
+      DBoW2::FeatureVector fv;
+      mpORBVocabulary->transform(desc_vec2j, bv, fv, 4);
+      vbv2.push_back(bv);
+    }
   }
 
+  // Compare BoW vectors
+  std::vector<double> _tmp(desc_vec2.size(), 0.0);
+  std::vector<std::vector<double>> scores(desc_vec1.size(), _tmp);
+  t0 = std::chrono::steady_clock::now();
   for (size_t i = 0; i < vbv1.size(); ++i) {
     std::vector<double> score;
     for (size_t j = 0; j < vbv2.size(); ++j) {
@@ -152,11 +171,9 @@ int main(int argc, char **argv) {
     }
     printProgress(double(i) / desc_vec1.size());
   }
-
-  std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-  float ttOpt =
-      std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
-          .count();
+  t1 = std::chrono::steady_clock::now();
+  ttOpt = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
+              .count();
   std::cout << std::endl
             << "BoW matching time: " << 1000.0 * ttOpt / desc_vec1.size()
             << "ms" << std::endl;

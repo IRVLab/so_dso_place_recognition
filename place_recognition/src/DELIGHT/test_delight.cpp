@@ -32,10 +32,10 @@ int main(int argc, char **argv) {
   // process points
   std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_spherical_vec;
   pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
-                 lidarRange, pts_spherical_vec);
+                 lidarRange, pts_spherical_vec, true);
 
   DELIGHT *delight = new DELIGHT();
-  Eigen::MatrixXd historyDELIGHT = Eigen::MatrixXd(
+  Eigen::MatrixXd history_delight = Eigen::MatrixXd(
       16 * pts_spherical_vec.size(), delight->getSignatureSize());
 
   float total_time = 0.0;
@@ -49,8 +49,9 @@ int main(int argc, char **argv) {
             .count();
     total_time += ttOpt;
 
-    // record historyDELIGHT
-    historyDELIGHT.block(16 * pts_i, 0, 16, historyDELIGHT.cols()) = signature;
+    // record history_delight
+    history_delight.block(16 * pts_i, 0, 16, history_delight.cols()) =
+        signature;
 
     printProgress(float(pts_i) / pts_spherical_vec.size());
   }
@@ -61,7 +62,7 @@ int main(int argc, char **argv) {
 
   std::ofstream delight_file_stream;
   delight_file_stream.open(delight_file);
-  delight_file_stream << historyDELIGHT;
+  delight_file_stream << history_delight;
   delight_file_stream.close();
 
   delete delight;

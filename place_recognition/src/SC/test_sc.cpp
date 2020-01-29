@@ -31,10 +31,10 @@ int main(int argc, char **argv) {
   // process points
   std::vector<std::vector<std::pair<Eigen::Vector3d, float>>> pts_spherical_vec;
   pts_preprocess(poses_history_file, pts_history_file, incoming_id_file,
-                 lidarRange, pts_spherical_vec);
+                 lidarRange, pts_spherical_vec, false);
 
   SC *sc = new SC(lidarRange);
-  Eigen::MatrixXd historySC =
+  Eigen::MatrixXd history_sc =
       Eigen::MatrixXd(pts_spherical_vec.size(), 2 * sc->getSignatureSize());
 
   float total_time = 0.0;
@@ -49,10 +49,10 @@ int main(int argc, char **argv) {
             .count();
     total_time += ttOpt;
 
-    // record historySC
-    Eigen::VectorXd signature(historySC.cols());
+    // record history_sc
+    Eigen::VectorXd signature(history_sc.cols());
     signature << signature_structure, signature_intensity;
-    historySC.row(pts_i) = signature.transpose();
+    history_sc.row(pts_i) = signature.transpose();
 
     printProgress(float(pts_i) / pts_spherical_vec.size());
   }
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 
   std::ofstream sc_file_stream;
   sc_file_stream.open(sc_file);
-  sc_file_stream << historySC;
+  sc_file_stream << history_sc;
   sc_file_stream.close();
 
   delete sc;

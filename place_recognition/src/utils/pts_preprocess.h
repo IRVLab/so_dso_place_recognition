@@ -16,7 +16,7 @@
 
 #define INIT_FRAME 30
 #define RES_GRID 30
-// #define RES_GRID 1 / 180 * M_PI
+#define RES_POLAR 1.0 / 180.0 * M_PI
 
 typedef pcl::PointCloud<pcl::PointXYZI> PointCloud;
 
@@ -141,7 +141,7 @@ filterPointsPolar(std::vector<IDPtIntensity *> &inPtsI,
 inline void generate_spherical_points(
     const IDPose *cur_pose, std::vector<IDPtIntensity *> &nearby_pts,
     std::vector<std::pair<Eigen::Vector3d, float>> &pts_spherical,
-    double lidarRange) {
+    double lidarRange, bool polar_filter) {
   std::vector<IDPtIntensity *> new_nearby_pts, pts_spherical_raw;
   for (auto &p : nearby_pts) {
     Eigen::Vector4d p_g(p->pt(0), p->pt(1), p->pt(2), 1.0);
@@ -155,10 +155,13 @@ inline void generate_spherical_points(
   }
 
   // filter points
-  filterPoints(pts_spherical_raw, lidarRange,
-               {RES_GRID, 2 * RES_GRID, RES_GRID}, pts_spherical);
-  // filterPointsPolar(pts_spherical_raw, {RES_GRID, RES_GRID, RES_GRID},
-  //                   pts_spherical);
+  if (polar_filter) {
+    filterPointsPolar(pts_spherical_raw, {RES_POLAR, RES_POLAR, RES_POLAR},
+                      pts_spherical);
+  } else {
+    filterPoints(pts_spherical_raw, lidarRange,
+                 {RES_GRID, 2 * RES_GRID, RES_GRID}, pts_spherical);
+  }
 
   printf("\rFrame count: %d, Pts (Total: %lu, Sphere: %lu, Filtered: %lu)",
          cur_pose->incoming_id, nearby_pts.size(), pts_spherical_raw.size(),
@@ -173,7 +176,8 @@ inline void
 pts_preprocess(std::string &poses_history_file, std::string &pts_history_file,
                std::string &incoming_id_file, double lidarRange,
                std::vector<std::vector<std::pair<Eigen::Vector3d, float>>>
-                   &pts_spherical_vec) {
+                   &pts_spherical_vec,
+               bool polar_filter) {
   // read data
   std::vector<IDPose *> poses_history;
   std::vector<IDPtIntensity *> pts_history;
@@ -209,7 +213,8 @@ pts_preprocess(std::string &poses_history_file, std::string &pts_history_file,
 
     // get sphere pts
     pts_spherical.clear();
-    generate_spherical_points(cur_pose, nearby_pts, pts_spherical, lidarRange);
+    generate_spherical_points(cur_pose, nearby_pts, pts_spherical, lidarRange,
+                              polar_filter);
     pts_spherical_vec.push_back(pts_spherical);
     pts_count += pts_spherical.size();
 
