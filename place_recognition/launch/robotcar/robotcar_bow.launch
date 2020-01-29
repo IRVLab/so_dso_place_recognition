@@ -1,5 +1,5 @@
 <launch>
-  <node name="so_dso_bow" pkg="so_dso_place_recognition" type="test_bow" output="screen" required="true">
+  <node name="so_dso_bow" pkg="so_dso_place_recognition" type="test_bow" output="screen">
     <param name="voc_file" value="$(find so_dso_place_recognition)/place_recognition/src/BoW/ORBvoc.txt" />
     <param name="incoming_id_file1" value="$(find so_dso_place_recognition)/place_recognition/results/RobotCar/$(arg date1)/incoming_id_file.txt" />
     <param name="incoming_id_file2" value="$(find so_dso_place_recognition)/place_recognition/results/RobotCar/$(arg date2)/incoming_id_file.txt" />

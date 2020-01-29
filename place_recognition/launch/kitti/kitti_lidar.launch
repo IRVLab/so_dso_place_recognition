@@ -1,7 +1,7 @@
 <launch>
   <arg name="folder" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/$(arg seq)" />
 
-  <node name="test_$(arg method)" pkg="so_dso_place_recognition" type="test_$(arg method)" output="screen" required="true">
+  <node name="test_$(arg method)" pkg="so_dso_place_recognition" type="test_$(arg method)" output="screen">
     <param name="poses_history_file" value="$(arg folder)/poses_history_file.txt" />
     <param name="pts_history_file" value="$(arg folder)/pts_history_file.txt" />
     <param name="$(arg method)_file" value="$(arg folder)/history_$(arg method).txt" />
