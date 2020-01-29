@@ -1,7 +1,4 @@
-function diff_m = processGIST(hist1, hist2, start_idx, end_idx)
-    hist1 = hist1(start_idx+1:size(hist1,1)-end_idx, :);
-    hist2 = hist2(start_idx+1:size(hist2,1)-end_idx, :);
-
+function diff_m = processGIST(hist1, hist2)
     m = size(hist1,1);
     n = size(hist2,1);
     diff_m = zeros(m,n);

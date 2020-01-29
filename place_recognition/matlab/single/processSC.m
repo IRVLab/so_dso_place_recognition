@@ -1,5 +1,4 @@
-function [diff_m_ci, diff_m_c, diff_m_i] = processSC(hist, start_idx, end_idx)
-    hist = hist(start_idx+1:size(hist,1)-end_idx, :);
+function [diff_m_ci, diff_m_c, diff_m_i] = processSC(hist)
     hist_t = hist(:,1:size(hist,2)/2);
     hist_i = hist(:,size(hist,2)/2+1:end);
 
