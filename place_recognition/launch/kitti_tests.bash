@@ -1,8 +1,8 @@
 #!/bin/bash
 
-for s in 00 05 06
+for s in 00 05 06 07
 do
-    for m in delight sc m2dp
+    for m in delight m2dp sc 
     do
         roslaunch so_dso_place_recognition kitti_lidar.launch seq:=$s method:=$m
     done
