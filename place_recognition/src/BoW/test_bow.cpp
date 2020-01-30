@@ -101,11 +101,10 @@ void extractDescFromBagByID(std::string incoming_id_file, std::string bag_file,
 int main(int argc, char **argv) {
   ros::init(argc, argv, "test_bow");
   ros::NodeHandle nhPriv("~");
-  std::string voc_file, id1, id2, bag1, bag2, img_topic, output_file;
+  std::string voc_file, id, bag, img_topic, output_file;
   if (!nhPriv.getParam("voc_file", voc_file) ||
-      !nhPriv.getParam("incoming_id_file1", id1) ||
-      !nhPriv.getParam("incoming_id_file2", id2) ||
-      !nhPriv.getParam("bag1", bag1) || !nhPriv.getParam("bag2", bag2) ||
+      !nhPriv.getParam("incoming_id_file", id) ||
+      !nhPriv.getParam("bag", bag) ||
       !nhPriv.getParam("img_topic", img_topic) ||
       !nhPriv.getParam("output_file", output_file)) {
     ROS_INFO("Fail to get params, exit.");
@@ -122,66 +121,43 @@ int main(int argc, char **argv) {
   std::cout << "Vocabulary loaded!" << std::endl << std::endl;
 
   // Extract descriptors for each frame by ID
-  std::vector<cv::Mat> desc_vec1, desc_vec2;
-  extractDescFromBagByID(id1, bag1, img_topic, desc_vec1);
-  if (bag1.compare(bag2) == 0) {
-    desc_vec2 = desc_vec1;
-  } else {
-    extractDescFromBagByID(id2, bag2, img_topic, desc_vec2);
-  }
+  std::vector<cv::Mat> desc_vec;
+  extractDescFromBagByID(id, bag, img_topic, desc_vec);
 
   // Transform to BoW vectors
-  std::vector<DBoW2::BowVector> vbv1, vbv2;
+  std::vector<DBoW2::BowVector> vbv;
   std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-  for (size_t j = 0; j < desc_vec1.size(); ++j) {
-    std::vector<cv::Mat> desc_vec1j = toDescriptorVector(desc_vec1[j]);
+  for (size_t j = 0; j < desc_vec.size(); ++j) {
+    std::vector<cv::Mat> desc_vecj = toDescriptorVector(desc_vec[j]);
     DBoW2::BowVector bv;
     DBoW2::FeatureVector fv;
-    mpORBVocabulary->transform(desc_vec1j, bv, fv, 4);
-    vbv1.push_back(bv);
+    mpORBVocabulary->transform(desc_vecj, bv, fv, 4);
+    vbv.push_back(bv);
   }
+
   std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
   float ttOpt =
       std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
           .count();
   std::cout << std::endl
-            << "BoW vector transform time: "
-            << 1000.0 * ttOpt / desc_vec1.size() << "ms" << std::endl;
-
-  if (bag1.compare(bag2) == 0) {
-    vbv2 = vbv1;
-  } else {
-    for (size_t j = 0; j < desc_vec2.size(); ++j) {
-      std::vector<cv::Mat> desc_vec2j = toDescriptorVector(desc_vec2[j]);
-      DBoW2::BowVector bv;
-      DBoW2::FeatureVector fv;
-      mpORBVocabulary->transform(desc_vec2j, bv, fv, 4);
-      vbv2.push_back(bv);
-    }
-  }
-
-  // Compare BoW vectors
-  std::vector<double> _tmp(desc_vec2.size(), 0.0);
-  std::vector<std::vector<double>> scores(desc_vec1.size(), _tmp);
-  t0 = std::chrono::steady_clock::now();
-  for (size_t i = 0; i < vbv1.size(); ++i) {
-    std::vector<double> score;
-    for (size_t j = 0; j < vbv2.size(); ++j) {
-      scores[i][j] = mpORBVocabulary->score(vbv1[i], vbv2[j]);
-    }
-    printProgress(double(i) / desc_vec1.size());
-  }
-  t1 = std::chrono::steady_clock::now();
-  ttOpt = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0)
-              .count();
-  std::cout << std::endl
-            << "BoW matching time: " << 1000.0 * ttOpt / desc_vec1.size()
+            << "BoW vector transform time: " << 1000.0 * ttOpt / desc_vec.size()
             << "ms" << std::endl;
 
   std::ofstream outfile(output_file);
-  for (auto ss : scores) {
-    for (auto s : ss) {
-      outfile << s << " ";
+  for (auto bv : vbv) {
+    DBoW2::BowVector::const_iterator bit;
+    for (bit = bv.begin(); bit != bv.end(); ++bit) {
+      outfile << bit->first << " ";
+    }
+    for (size_t i = bv.size(); i < 4000; i++) {
+      outfile << "-1 ";
+    }
+    outfile << std::endl;
+    for (bit = bv.begin(); bit != bv.end(); ++bit) {
+      outfile << bit->second << " ";
+    }
+    for (size_t i = bv.size(); i < 4000; i++) {
+      outfile << "-1 ";
     }
     outfile << std::endl;
   }
