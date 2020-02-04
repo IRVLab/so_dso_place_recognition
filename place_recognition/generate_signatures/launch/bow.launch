@@ -1,0 +1,9 @@
+<launch>
+  <node name="so_dso_bow" pkg="so_dso_place_recognition" type="test_bow" output="screen">
+    <param name="voc_file" value="$(find so_dso_place_recognition)/place_recognition/generate_signatures/src/BoW/ORBvoc.txt" />
+    <param name="incoming_id_file" value="$(find so_dso_place_recognition)/place_recognition/results/$(arg dataset)/$(arg seq)/incoming_id_file.txt" />
+    <param name="bag" value="/home/moxxx066/Workspace/data/bags/$(arg dataset)/$(arg seq).bag" />
+    <param name="img_topic" value="$(arg img_topic)" />
+    <param name="output_file" value="$(find so_dso_place_recognition)/place_recognition/results/$(arg dataset)/$(arg seq)/history_bow.txt" />
+  </node>
+</launch>
