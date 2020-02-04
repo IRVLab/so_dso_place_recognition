@@ -14,14 +14,22 @@ function dist = processDELIGHT(hist1, hist2)
             B = hist2((16*(j-1)+1):(16*j), :);
             min_dist = Inf;
             for k=1:4
-                Ak=A;
+                Ak=A(:);
                 Bk = B(Mut(k,:),:);
-                Ak((Ak+Bk)==0)=1;
-                Bk((Ak+Bk)==0)=1;
-                S = (2*(Ak-Bk).*(Ak-Bk)) ./ (Ak+Bk);
-                cur_dist = sum(sum(S));
-                if(min_dist > cur_dist)
-                    min_dist = cur_dist;
+                Bk = Bk(:);
+                AB_s = Ak+Bk;
+                ts = 0;
+                tc = 0;
+                for l=1:size(Ak,1)
+                    if(AB_s(l)>0)
+                        s = 2*(Ak(l)-Bk(l))^2/AB_s(l);
+                        ts = ts + s;
+                        tc = tc + 1;
+                    end
+                end
+                ts = ts / tc;
+                if(min_dist > ts)
+                    min_dist = ts;
                 end
             end
             dist(i,j) = min_dist;
