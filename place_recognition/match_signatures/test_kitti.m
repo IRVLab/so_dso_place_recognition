@@ -15,9 +15,10 @@ close all
 %BoW      0.7883    0.8094    0.9629
 %GIST     0.7741    0.6588    0.7294
 
-types = ["delight","m2dp","sc","bow","gist";];
+% types = ["delight","m2dp","sc","bow","gist"];
+types = ["delight"];
 
-run_seq = ["../results/KITTI/seq00/", "../results/KITTI/seq05/", "../results/KITTI/seq06/"];
+run_seq = ["../results/KITTI/seq00/", "../results/KITTI/seq05/", "../results/KITTI/seq06/", "../results/KITTI/seq07/"];
 
 TRs = zeros(size(types, 2), size(run_seq, 1));
 AUCs = zeros(size(types, 2), size(run_seq, 1));
