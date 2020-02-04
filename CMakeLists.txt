@@ -44,4 +44,4 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 add_subdirectory(so_dso)
-add_subdirectory(place_recognition)
+add_subdirectory(place_recognition/generate_signatures)

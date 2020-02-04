@@ -1,9 +1,0 @@
-<launch>
-  <node name="so_dso_bow" pkg="so_dso_place_recognition" type="test_bow" output="screen">
-    <param name="voc_file" value="$(find so_dso_place_recognition)/place_recognition/src/BoW/ORBvoc.txt" />
-    <param name="incoming_id_file" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/$(arg seq)/incoming_id_file.txt" />
-    <param name="bag" value="/home/moxxx066/Workspace/data/bags/KITTI/seq$(arg seq).bag" />
-    <param name="img_topic" value="/left/image_raw" />
-    <param name="output_file" value="$(find so_dso_place_recognition)/place_recognition/results/KITTI/$(arg seq)/history_bow.txt" />
-  </node>
-</launch>
