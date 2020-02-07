@@ -16,8 +16,7 @@ close all
 %GIST     0.7940    0.3766    0.2415    0.1758    0.5029    0.2415    0.1558         0    0.1089         0
     
     
-% types = ["delight","m2dp","sc","bow","gist"];
-types = ["delight";];
+types = ["delight","m2dp","sc","bow","gist"];
 
 dates = ["2014-07-14-14-49-50"; "2014-11-28-12-07-13"; "2014-12-12-10-45-15";
          "2015-02-10-11-58-05"; "2015-05-19-14-06-38"; "2015-05-22-11-14-30";
@@ -28,10 +27,10 @@ run_seq = [5,6; 5,7; 5,8; 5,4; 7,1; 7,8; 7,4; 8,2; 8,4; 4,3];
 TRs = zeros(size(types, 2), size(run_seq, 1));
 AUCs = zeros(size(types, 2), size(run_seq, 1));
 
-for ti=1:size(types,2)
-% for ti=4
+% for ti=1:size(types,2)
+for ti=4
     for si=1:size(run_seq,1)
-%     for si=1
+%     for si=4
         [AUCs(ti, si), TRs(ti, si)] = run_robotcar(dates(run_seq(si,1)), dates(run_seq(si,2)), types(ti));
         pause(0.5);
     end

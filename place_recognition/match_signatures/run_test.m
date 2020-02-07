@@ -25,19 +25,24 @@ total_lp = length(lp_gt);
 tic 
 switch type 
     case 'm2dp' 
-        [diff_m, diff_m_p, diff_m_i] = processM2DP(hist1, hist2);
+        [diff_m_p, diff_m_i] = processM2DP(hist1, hist2);
     case 'sc'
-        [diff_m, diff_m_p, diff_m_i] = processSC(hist1, hist2);
+        [diff_m_p, diff_m_i] = processSC(hist1, hist2);
     case 'delight'
         diff_m = processDELIGHT(hist1, hist2);
     case 'gist'
         diff_m = processGIST(hist1, hist2);
     case 'bow'
         diff_m = processBoW(hist1, hist2);
+        diff_m = normalize(diff_m,2);
+end
+if strcmp(type, 'm2dp') || strcmp(type, 'sc')
+    p_weight = 2;
+    diff_m = (normalize(diff_m_p,2)*p_weight + normalize(diff_m_i,2)) / (p_weight+1);
 end
 tm = toc;
-type
-tm = 1000 * tm / size(diff_m,1)
+% type
+% tm = 1000 * tm / size(diff_m,1)
 
 % mask out place pairs that is too close
 for i=1:size(diff_m,1)
@@ -103,38 +108,38 @@ end
 axis equal
 title('Trajectory')
 
-%% show individual results and intersection for M2DP and SC
-% top_count = 300;
-if strcmp(type, 'm2dp') || strcmp(type, 'sc')
-    for i=1:size(diff_m,1)
-        for j=1:size(diff_m,2)
-            if(abs(i-j)<mask_width)
-                diff_m_p(i,j) = Inf;
-                diff_m_i(i,j) = Inf;
-            end
-        end
-    end
-    [diff_v_p, diff_p_idx] = min(diff_m_p);
-    [~, rank_p] = sort(diff_v_p);
-    [diff_v_i, diff_i_idx] = min(diff_m_i);
-    [~, rank_i] = sort(diff_v_i);
-    [diff_v_pi, diff_pi_idx] = min(diff_m);
-    [~, rank_pi] = sort(diff_v_pi);
-    lp_p = [rank_p(1:top_count)', diff_p_idx(rank_p(1:top_count))'];
-    lp_i = [rank_i(1:top_count)', diff_i_idx(rank_i(1:top_count))'];
-    lp_pi = [rank_pi(1:top_count)', diff_pi_idx(rank_pi(1:top_count))'];
-    figure('Name', 'Place Recognition')
-    subplot(1,2,1)
-    plot(lp_p(:,1),lp_p(:,2), 'r.');
-    hold on
-    plot(lp_i(:,1),lp_i(:,2), 'g.');
-    hold on
-    plot(lp_pi(:,1),lp_pi(:,2), 'b*');
-    legend('Pts Count', 'Ave Color', 'Intersection')
-    title('Detected');
-    subplot(1,2,2)
-    plot(lp_gt(:,1),lp_gt(:,2), 'k*');
-    title('Ground Truth');
-end
+% %% show individual results and intersection for M2DP and SC
+% % top_count = 300;
+% if strcmp(type, 'm2dp') || strcmp(type, 'sc')
+%     for i=1:size(diff_m,1)
+%         for j=1:size(diff_m,2)
+%             if(abs(i-j)<mask_width)
+%                 diff_m_p(i,j) = Inf;
+%                 diff_m_i(i,j) = Inf;
+%             end
+%         end
+%     end
+%     [diff_v_p, diff_p_idx] = min(diff_m_p');
+%     [~, rank_p] = sort(diff_v_p);
+%     [diff_v_i, diff_i_idx] = min(diff_m_i');
+%     [~, rank_i] = sort(diff_v_i);
+%     [diff_v_pi, diff_pi_idx] = min(diff_m');
+%     [~, rank_pi] = sort(diff_v_pi);
+%     lp_p = [rank_p(1:top_count)', diff_p_idx(rank_p(1:top_count))'];
+%     lp_i = [rank_i(1:top_count)', diff_i_idx(rank_i(1:top_count))'];
+%     lp_pi = [rank_pi(1:top_count)', diff_pi_idx(rank_pi(1:top_count))'];
+%     figure('Name', 'Place Recognition')
+%     subplot(1,2,1)
+%     plot(lp_p(:,1),lp_p(:,2), 'r.');
+%     hold on
+%     plot(lp_i(:,1),lp_i(:,2), 'g.');
+%     hold on
+%     plot(lp_pi(:,1),lp_pi(:,2), 'b*');
+%     legend('Pts Count', 'Ave Color', 'Intersection')
+%     title('Detected');
+%     subplot(1,2,2)
+%     plot(lp_gt(:,1),lp_gt(:,2), 'k*');
+%     title('Ground Truth');
+% end
 
 end
