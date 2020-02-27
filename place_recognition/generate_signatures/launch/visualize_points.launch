@@ -1,0 +1,15 @@
+<launch>
+  <arg name="dataset" value="KITTI" />
+  <arg name="img_topic" value="/left/image_raw" />
+  <arg name="seq" value="seq06" />
+
+  <arg name="folder" value="$(find so_dso_place_recognition)/place_recognition/results/$(arg dataset)/$(arg seq)"/> 
+  <node name="so_dso_gist" pkg="so_dso_place_recognition" type="visualize_points" output="screen" required="true">
+    <param name="poses_history_file" value="$(arg folder)/poses_history_file.txt" />
+    <param name="pts_history_file" value="$(arg folder)/pts_history_file.txt" />
+    <param name="bag" value="/home/moxxx066/Workspace/data/bags/$(arg dataset)/$(arg seq).bag" />
+    <param name="img_topic" value="$(arg img_topic)" />
+    <param name="incoming_id_file" value="$(find so_dso_place_recognition)/place_recognition/results/$(arg dataset)/$(arg seq)/incoming_id_file.txt" />
+  </node>
+</launch>
+

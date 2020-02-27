@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # KITTI
-for s in seq00 seq05 seq06 seq07
+for s in seq00 seq02 seq05 seq06 seq07
 do
     for m in delight m2dp sc 
     do

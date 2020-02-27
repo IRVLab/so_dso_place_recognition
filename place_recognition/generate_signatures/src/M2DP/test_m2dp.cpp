@@ -13,7 +13,6 @@
 int main(int argc, char **argv) {
   ros::init(argc, argv, "test_m2dp");
   ros::NodeHandle nhPriv("~");
-  ros::Publisher pub = nhPriv.advertise<PointCloud>("sphere_points", 1);
 
   // get parameters
   std::string poses_history_file, pts_history_file, m2dp_file, incoming_id_file;

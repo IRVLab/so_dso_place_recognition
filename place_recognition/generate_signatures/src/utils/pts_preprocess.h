@@ -8,17 +8,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/point_cloud.h>
-
 #include "PosesPts.h"
 
 #define INIT_FRAME 30
 #define RES_GRID 30
 #define RES_POLAR 1.0 / 180.0 * M_PI
-
-typedef pcl::PointCloud<pcl::PointXYZI> PointCloud;
 
 inline void read_poses_pts(const std::string &poses_history_file_name,
                            const std::string &pts_history_file_name,

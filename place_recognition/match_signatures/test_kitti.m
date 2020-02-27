@@ -2,9 +2,7 @@ clear
 close all
 
 types = ["delight","m2dp","sc","bow","gist"];
-run_seq = ["../results/KITTI/seq00/", "../results/KITTI/seq05/", "../results/KITTI/seq06/", "../results/KITTI/seq07/"];
-
-% types = ["sc"];
+run_seq = ["../results/KITTI/seq00/", "../results/KITTI/seq02/", "../results/KITTI/seq05/", "../results/KITTI/seq06/", "../results/KITTI/seq07/"];
 
 TRs = zeros(size(types, 2), size(run_seq, 1));
 AUCs = zeros(size(types, 2), size(run_seq, 1));

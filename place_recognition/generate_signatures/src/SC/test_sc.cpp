@@ -12,7 +12,6 @@
 int main(int argc, char **argv) {
   ros::init(argc, argv, "test_sc");
   ros::NodeHandle nhPriv("~");
-  ros::Publisher pub = nhPriv.advertise<PointCloud>("sphere_points", 1);
 
   // get parameters
   std::string poses_history_file, pts_history_file, sc_file, incoming_id_file;

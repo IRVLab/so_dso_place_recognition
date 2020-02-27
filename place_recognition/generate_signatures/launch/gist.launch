@@ -9,7 +9,7 @@
   <!-- <arg name="seq" value="2015-08-13-16-02-58" /> -->
   <!-- <arg name="seq" value="2015-10-30-13-52-14" /> -->
 
-  <node name="so_dso_gist" pkg="so_dso_place_recognition" type="test_gist" output="screen">
+  <node name="so_dso_gist" pkg="so_dso_place_recognition" type="test_gist" output="screen" required="true">
     <param name="incoming_id_file" value="$(find so_dso_place_recognition)/place_recognition/results/$(arg dataset)/$(arg seq)/incoming_id_file.txt" />
     <param name="bag" value="/home/moxxx066/Workspace/data/bags/$(arg dataset)/$(arg seq).bag" />
     <param name="img_topic" value="$(arg img_topic)" />
