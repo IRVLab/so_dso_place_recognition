@@ -38,7 +38,7 @@ switch type
 end
 if strcmp(type, 'm2dp') || strcmp(type, 'sc')
     p_weight = 2;
-    diff_m = (normalize(diff_m_p,2)*p_weight + normalize(diff_m_i,2)) / (p_weight+1);
+    diff_m = p_weight*normalize(diff_m_p,2) + normalize(diff_m_i,2);
 end
 tm = toc;
 % type
