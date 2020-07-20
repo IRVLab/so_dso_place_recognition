@@ -34,15 +34,14 @@ switch type
         diff_m = processGIST(hist1, hist2);
     case 'bow'
         diff_m = processBoW(hist1, hist2);
-        diff_m = normalize(diff_m,2);
 end
 if strcmp(type, 'm2dp') || strcmp(type, 'sc')
     p_weight = 2;
     diff_m = p_weight*normalize(diff_m_p,2) + normalize(diff_m_i,2);
 end
 tm = toc;
-% type
-% tm = 1000 * tm / size(diff_m,1)
+type
+tm = 1000 * tm / size(diff_m,1)
 
 % mask out place pairs that is too close
 for i=1:size(diff_m,1)
